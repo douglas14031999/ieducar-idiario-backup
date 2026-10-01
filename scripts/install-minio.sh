@@ -35,7 +35,7 @@ fi
 # Parâmetros padrão
 MINIO_VERSION="RELEASE.2021-04-22T15-44-28Z"
 MINIO_BIN_URL="https://github.com/minio/minio/releases/download/${MINIO_VERSION}/minio.linux-amd64.${MINIO_VERSION}"
-MC_BIN_URL="https://dl.min.io/client/mc/release/linux-amd64/mc"
+MC_BIN_URL="https://github.com/minio/mc/releases/download/RELEASE.2025-08-13T08-35-41Z/mc.linux-amd64.RELEASE.2025-08-13T08-35-41Z"
 
 MINIO_DATA_DIR="${MINIO_DATA_DIR:-/data/minio}"
 MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY:-admin}"
