@@ -55,15 +55,13 @@ elif command -v yum &>/dev/null; then
     yum install -y curl wget ca-certificates >/dev/null 2>&1 || true
 fi
 
-# 2. Download do binário do MinIO Server
+# 2. Download do binário do MinIO Server (Forçando versão exata RELEASE.2021-04-22T15-44-28Z)
 log_info "Baixando o MinIO Server da versão ${MINIO_VERSION}..."
-if [[ ! -f /usr/local/bin/minio ]] || ! /usr/local/bin/minio --version 2>&1 | grep -q "${MINIO_VERSION}"; then
-    curl -fsSL --retry 3 "${MINIO_BIN_URL}" -o /usr/local/bin/minio
-    chmod +x /usr/local/bin/minio
-    log_success "MinIO Server instalado em /usr/local/bin/minio"
-else
-    log_info "MinIO Server já está instalado na versão correta."
-fi
+curl -fsSL --retry 3 "${MINIO_BIN_URL}" -o /usr/local/bin/minio
+chmod +x /usr/local/bin/minio
+ln -sf /usr/local/bin/minio /usr/bin/minio
+INSTALLED_VER=$(/usr/local/bin/minio --version 2>&1 || true)
+log_success "MinIO Server instalado: ${INSTALLED_VER}"
 
 # 3. Download do MinIO Client (mc)
 log_info "Baixando o MinIO Client (mc)..."
