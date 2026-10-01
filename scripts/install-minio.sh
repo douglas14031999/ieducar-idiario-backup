@@ -57,8 +57,9 @@ fi
 
 # 2. Download do binário do MinIO Server (Forçando versão exata RELEASE.2021-04-22T15-44-28Z)
 log_info "Baixando o MinIO Server da versão ${MINIO_VERSION}..."
-curl -fsSL --retry 3 "${MINIO_BIN_URL}" -o /usr/local/bin/minio
-chmod +x /usr/local/bin/minio
+curl -fsSL --retry 3 "${MINIO_BIN_URL}" -o /tmp/minio_bin
+chmod +x /tmp/minio_bin
+mv -f /tmp/minio_bin /usr/local/bin/minio
 ln -sf /usr/local/bin/minio /usr/bin/minio
 INSTALLED_VER=$(/usr/local/bin/minio --version 2>&1 || true)
 log_success "MinIO Server instalado: ${INSTALLED_VER}"
