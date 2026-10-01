@@ -33,9 +33,17 @@ if [[ -f "$ENV_FILE" ]]; then
 fi
 
 # Parâmetros padrão
-MINIO_VERSION="RELEASE.2021-04-22T15-44-28Z"
-MINIO_BIN_URL="https://github.com/minio/minio/releases/download/${MINIO_VERSION}/minio.linux-amd64.${MINIO_VERSION}"
-MC_BIN_URL="https://github.com/minio/mc/releases/download/RELEASE.2025-08-13T08-35-41Z/mc.linux-amd64.RELEASE.2025-08-13T08-35-41Z"
+MINIO_VERSION="RELEASE.2025-09-07T16-13-09Z"
+
+# Detectar arquitetura do sistema (x86_64 vs arm64)
+ARCH=$(uname -m)
+case "$ARCH" in
+    aarch64|arm64) MINIO_ARCH="linux-arm64" ;;
+    *) MINIO_ARCH="linux-amd64" ;;
+esac
+
+MINIO_BIN_URL="https://github.com/minio/minio/releases/download/${MINIO_VERSION}/minio.${MINIO_ARCH}.${MINIO_VERSION}"
+MC_BIN_URL="https://github.com/minio/mc/releases/download/RELEASE.2025-08-13T08-35-41Z/mc.${MINIO_ARCH}.RELEASE.2025-08-13T08-35-41Z"
 
 MINIO_DATA_DIR="${MINIO_DATA_DIR:-/data/minio}"
 MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY:-admin}"
@@ -44,7 +52,7 @@ MINIO_BUCKET="${MINIO_BUCKET:-ieducar-backups}"
 MINIO_ALIAS="${MINIO_ALIAS:-local-minio}"
 MINIO_ENDPOINT="${MINIO_ENDPOINT:-http://127.0.0.1:9000}"
 
-log_info "==> Iniciando instalação do MinIO (${MINIO_VERSION})..."
+log_info "==> Iniciando instalação do MinIO (${MINIO_VERSION} [${MINIO_ARCH}])..."
 
 # 1. Instalar dependências essenciais
 log_info "Verificando dependências básicas (curl, wget, tar)..."
@@ -90,15 +98,15 @@ chmod 750 "${MINIO_DATA_DIR}"
 log_info "Gerando arquivo de configuração em /etc/default/minio..."
 mkdir -p /etc/default
 cat <<EOF > /etc/default/minio
-# Configuração MinIO Server - RELEASE.2021-04-22T15-44-28Z
+# Configuração MinIO Server - RELEASE.2025-09-07T16-13-09Z
 MINIO_VOLUMES="${MINIO_DATA_DIR}"
-MINIO_OPTS="--address 0.0.0.0:9000"
+MINIO_OPTS="--address 0.0.0.0:9000 --console-address 0.0.0.0:9001"
 
-# Credenciais (Compatíveis com v2021 e versões modernas)
-MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY}"
-MINIO_SECRET_KEY="${MINIO_SECRET_KEY}"
+# Credenciais
 MINIO_ROOT_USER="${MINIO_ACCESS_KEY}"
 MINIO_ROOT_PASSWORD="${MINIO_SECRET_KEY}"
+MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY}"
+MINIO_SECRET_KEY="${MINIO_SECRET_KEY}"
 EOF
 
 chmod 600 /etc/default/minio
@@ -165,8 +173,9 @@ log_info "Garantindo que o bucket '${MINIO_BUCKET}' exista..."
 
 log_success "==> Instalação e configuração do MinIO concluída com sucesso!"
 echo -e "${GREEN}------------------------------------------------------------${NC}"
-echo -e " Endpoint Web: ${YELLOW}http://$(curl -s https://api.ipify.org || echo "IP_DA_SUA_VPS"):9000${NC}"
-echo -e " Usuário:      ${YELLOW}${MINIO_ACCESS_KEY}${NC}"
-echo -e " Bucket:       ${YELLOW}${MINIO_BUCKET}${NC}"
-echo -e " Status:       ${GREEN}systemctl status minio.service${NC}"
+echo -e " S3 API:          ${YELLOW}http://$(curl -s https://api.ipify.org || echo "IP_DA_SUA_VPS"):9000${NC}"
+echo -e " Console Web UI:  ${YELLOW}http://$(curl -s https://api.ipify.org || echo "IP_DA_SUA_VPS"):9001${NC}"
+echo -e " Usuário:         ${YELLOW}${MINIO_ACCESS_KEY}${NC}"
+echo -e " Bucket:          ${YELLOW}${MINIO_BUCKET}${NC}"
+echo -e " Status:          ${GREEN}systemctl status minio.service${NC}"
 echo -e "${GREEN}------------------------------------------------------------${NC}"
