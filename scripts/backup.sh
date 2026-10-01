@@ -169,7 +169,7 @@ for file in "${BACKUP_FILES[@]}"; do
     filename=$(basename "$file")
     target_path="${MINIO_ALIAS}/${MINIO_BUCKET}/${DATE_FOLDER}/${filename}"
     log_info "Enviando ${filename}..."
-    mc cp "$file" "$target_path" >/dev/null 2>&1
+    mc cp --quiet "$file" "$target_path"
     filesize=$(du -h "$file" | awk '{print $1}')
     UPLOAD_SUMMARY+="${filename} (${filesize})\n"
     log_success "Upload concluído: ${target_path} [${filesize}]"
