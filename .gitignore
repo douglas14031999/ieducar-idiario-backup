@@ -1,0 +1,28 @@
+# Ambientes e Segredos
+.env
+.env.*
+!.env.example
+*.local
+
+# Backups gerados e temporários
+backups/
+*.sql
+*.sql.gz
+*.tar.gz
+*.tar
+tmp/
+temp/
+
+# Logs
+logs/
+*.log
+
+# MinIO data local se montado na pasta
+data/
+minio-data/
+
+# IDE e Sistema Operacional
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
