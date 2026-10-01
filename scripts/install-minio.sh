@@ -99,14 +99,14 @@ log_info "Gerando arquivo de configuração em /etc/default/minio..."
 mkdir -p /etc/default
 cat <<EOF > /etc/default/minio
 # Configuração MinIO Server - RELEASE.2025-09-07T16-13-09Z
-MINIO_VOLUMES="${MINIO_DATA_DIR}"
-MINIO_OPTS="--address 0.0.0.0:9000 --console-address 0.0.0.0:9001"
+MINIO_VOLUMES=${MINIO_DATA_DIR}
+MINIO_OPTS=--address 0.0.0.0:9000 --console-address 0.0.0.0:9001
 
 # Credenciais
-MINIO_ROOT_USER="${MINIO_ACCESS_KEY}"
-MINIO_ROOT_PASSWORD="${MINIO_SECRET_KEY}"
-MINIO_ACCESS_KEY="${MINIO_ACCESS_KEY}"
-MINIO_SECRET_KEY="${MINIO_SECRET_KEY}"
+MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
+MINIO_ROOT_PASSWORD=${MINIO_SECRET_KEY}
+MINIO_ACCESS_KEY=${MINIO_ACCESS_KEY}
+MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
 EOF
 
 chmod 600 /etc/default/minio
