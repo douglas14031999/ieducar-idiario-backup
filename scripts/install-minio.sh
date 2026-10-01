@@ -91,8 +91,8 @@ fi
 # 5. Criar diretório de dados
 log_info "Configurando diretório de armazenamento em: ${MINIO_DATA_DIR}..."
 mkdir -p "${MINIO_DATA_DIR}"
-chown -R minio-user:minio-user "${MINIO_DATA_DIR}"
-chmod 750 "${MINIO_DATA_DIR}"
+chown -R minio-user:minio-user "$(dirname "${MINIO_DATA_DIR}")" "${MINIO_DATA_DIR}" 2>/dev/null || true
+chmod 775 "${MINIO_DATA_DIR}"
 
 # 6. Criar arquivo de configuração /etc/default/minio
 log_info "Gerando arquivo de configuração em /etc/default/minio..."
@@ -101,6 +101,7 @@ cat <<EOF > /etc/default/minio
 # Configuração MinIO Server - RELEASE.2025-09-07T16-13-09Z
 MINIO_VOLUMES=${MINIO_DATA_DIR}
 MINIO_OPTS=--address 0.0.0.0:9000 --console-address 0.0.0.0:9001
+MINIO_API_ODIRECT=off
 
 # Credenciais
 MINIO_ROOT_USER=${MINIO_ACCESS_KEY}
