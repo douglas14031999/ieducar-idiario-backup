@@ -9,12 +9,7 @@
 
 set -euo pipefail
 
-# Recuperar entrada do terminal se executado via pipe (curl | bash)
-if [ ! -t 0 ]; then
-    exec < /dev/tty || true
-fi
-
-# Cores
+# Cores para terminal
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -39,36 +34,42 @@ CONFIG_DIR="/etc/ieducar-backup"
 ENV_FILE="${CONFIG_DIR}/.env"
 
 # 2. Instalação de pacotes essenciais
-echo -e "${BLUE}[1/6] Instalando dependências básicas do sistema...${NC}"
+echo -e "${BLUE}[1/6] Atualizando repositórios e instalando dependências do sistema...${NC}"
+export DEBIAN_FRONTEND=noninteractive
+
 if command -v apt-get &>/dev/null; then
-    apt-get update -qq >/dev/null 2>&1 || true
-    apt-get install -y -qq curl wget git cron tar gzip postgresql-client ca-certificates >/dev/null 2>&1 || true
+    apt-get update -y
+    apt-get install -y -o Dpkg::Options::="--force-confdef" -o Dpkg::Options::="--force-confold" \
+        curl wget git cron tar gzip postgresql-client ca-certificates
     systemctl enable cron >/dev/null 2>&1 || true
     systemctl start cron >/dev/null 2>&1 || true
 elif command -v yum &>/dev/null; then
-    yum install -y curl wget git cronie tar gzip postgresql ca-certificates >/dev/null 2>&1 || true
+    yum install -y curl wget git cronie tar gzip postgresql ca-certificates
     systemctl enable crond >/dev/null 2>&1 || true
     systemctl start crond >/dev/null 2>&1 || true
 fi
 
 # 3. Preparar diretórios da aplicação
 echo -e "${BLUE}[2/6] Configurando diretório de instalação em ${INSTALL_DIR}...${NC}"
-mkdir -p "${INSTALL_DIR}"
 mkdir -p "${CONFIG_DIR}"
 mkdir -p "/var/backups/ieducar-idiario"
 
 # Se o script está sendo rodado diretamente da pasta clonada, copia; senão faz download dos scripts
 if [[ -f "$(pwd)/scripts/backup.sh" ]]; then
     echo -e "${GREEN}Copiando arquivos locais para ${INSTALL_DIR}...${NC}"
+    mkdir -p "${INSTALL_DIR}"
     cp -r "$(pwd)"/* "${INSTALL_DIR}/"
 else
     echo -e "${BLUE}Baixando os scripts mais recentes do repositório...${NC}"
     REPO_URL="${GITHUB_REPO_URL:-https://github.com/douglas14031999/ieducar-idiario-backup.git}"
-    if command -v git &>/dev/null; then
-        if [[ -d "${INSTALL_DIR}/.git" ]]; then
-            git -C "${INSTALL_DIR}" pull origin main || true
-        else
-            git clone "${REPO_URL}" "${INSTALL_DIR}" || true
+    if [[ -d "${INSTALL_DIR}/.git" ]]; then
+        git -C "${INSTALL_DIR}" pull origin main || true
+    else
+        rm -rf "${INSTALL_DIR}"
+        if ! git clone "${REPO_URL}" "${INSTALL_DIR}" 2>/dev/null; then
+            echo -e "${YELLOW}Tentando download direto via tarball...${NC}"
+            mkdir -p "${INSTALL_DIR}"
+            curl -fsSL "https://github.com/douglas14031999/ieducar-idiario-backup/archive/refs/heads/main.tar.gz" | tar -xz --strip-components=1 -C "${INSTALL_DIR}"
         fi
     fi
 fi
@@ -88,24 +89,29 @@ if [[ ! -f "${ENV_FILE}" ]]; then
     fi
 
     echo ""
-    echo -e "${YELLOW}--- CONFIGURAÇÃO INTERATIVA DE CREDENCIAIS ---${NC}"
-    echo "Pressione ENTER para manter os valores padrão recomendados."
+    echo -e "${YELLOW}--- CONFIGURAÇÃO DE CREDENCIAIS ---${NC}"
+    echo "Pressione ENTER para manter os valores padrão sugeridos."
     echo ""
 
-    read -r -p "Usuário MinIO [admin]: " IN_MINIO_USER
-    IN_MINIO_USER="${IN_MINIO_USER:-admin}"
+    # Leitura interativa via /dev/tty para funcionar com curl | bash
+    read_interactive() {
+        local prompt_text="$1"
+        local default_val="$2"
+        local var_name="$3"
+        local user_val=""
 
-    read -r -p "Senha MinIO [Douglas140399.]: " IN_MINIO_PASS
-    IN_MINIO_PASS="${IN_MINIO_PASS:-Douglas140399.}"
+        if [ -e /dev/tty ]; then
+            read -r -p "$prompt_text" user_val < /dev/tty || true
+        fi
+        eval "$var_name=\"\${user_val:-$default_val}\""
+    }
 
-    read -r -p "Bucket MinIO [ieducar-backups]: " IN_MINIO_BUCKET
-    IN_MINIO_BUCKET="${IN_MINIO_BUCKET:-ieducar-backups}"
-
-    read -r -p "Dias de retenção automática [20]: " IN_RETENTION
-    IN_RETENTION="${IN_RETENTION:-20}"
-
-    read -r -p "Senha do banco PostgreSQL do i-Educar: " IN_IEDUCAR_PASS
-    read -r -p "Senha do banco PostgreSQL do i-Diário: " IN_IDIARIO_PASS
+    read_interactive "Usuário MinIO [admin]: " "admin" IN_MINIO_USER
+    read_interactive "Senha MinIO [Douglas140399.]: " "Douglas140399." IN_MINIO_PASS
+    read_interactive "Bucket MinIO [ieducar-backups]: " "ieducar-backups" IN_MINIO_BUCKET
+    read_interactive "Dias de retenção automática [20]: " "20" IN_RETENTION
+    read_interactive "Senha do banco PostgreSQL do i-Educar (ou enter para pular): " "" IN_IEDUCAR_PASS
+    read_interactive "Senha do banco PostgreSQL do i-Diário (ou enter para pular): " "" IN_IDIARIO_PASS
 
     # Atualizar o .env com os dados informados
     sed -i "s|MINIO_ACCESS_KEY=.*|MINIO_ACCESS_KEY=\"${IN_MINIO_USER}\"|g" "${ENV_FILE}"
@@ -163,7 +169,11 @@ echo -e "   - Para restaurar um backup:   ${GREEN}ieducar-restore${NC}"
 echo -e "${CYAN}======================================================================${NC}"
 
 # Perguntar se deseja testar agora
-read -r -p "Deseja rodar o primeiro teste de backup agora? (s/N): " RUN_TEST
+RUN_TEST="n"
+if [ -e /dev/tty ]; then
+    read -r -p "Deseja rodar o primeiro teste de backup agora? (s/N): " RUN_TEST < /dev/tty || true
+fi
+
 if [[ "$RUN_TEST" =~ ^[sS]$ ]]; then
     echo -e "${BLUE}Iniciando backup de teste...${NC}"
     /usr/local/bin/ieducar-backup
