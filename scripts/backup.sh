@@ -68,6 +68,41 @@ mc mb --ignore-existing "${MINIO_ALIAS}/${MINIO_BUCKET}" >/dev/null 2>&1 || true
 BACKUP_FILES=()
 
 # ==============================================================================
+# 0. SINCRONIZAÇÃO PRÉ-BACKUP: I-DIÁRIO COM O I-EDUCAR
+# ==============================================================================
+if [[ "${SYNC_BEFORE_BACKUP:-false}" == "true" ]]; then
+    log_info "--- Iniciando Sincronização Pré-Backup (i-Diário <-> i-Educar) ---"
+    IDIARIO_PATH="${IDIARIO_APP_DIR:-/root/i-diario}"
+    if [[ -d "$IDIARIO_PATH" ]]; then
+        log_info "Disparando sincronização do i-Diário com a API do i-Educar..."
+        export PATH="/root/.rbenv/shims:/root/.rbenv/bin:$PATH"
+        SYNC_CMD="${IDIARIO_SYNC_COMMAND:-RAILS_ENV=production bundle exec rake ieducar_api:synchronize}"
+        
+        SYNC_OUTPUT=""
+        SYNC_STATUS=0
+        SYNC_OUTPUT=$(cd "$IDIARIO_PATH" && eval "$SYNC_CMD" 2>&1) || SYNC_STATUS=$?
+        
+        if [[ $SYNC_STATUS -eq 0 ]]; then
+            log_success "Job de sincronização agendado no Sidekiq com sucesso!"
+            WAIT_SEC="${IDIARIO_SYNC_WAIT_SECONDS:-15}"
+            if [[ "$WAIT_SEC" -gt 0 ]]; then
+                log_info "Aguardando ${WAIT_SEC}s para processamento das filas no Sidekiq..."
+                sleep "$WAIT_SEC"
+            fi
+        else
+            log_warn "Aviso ao disparar sincronização (código: ${SYNC_STATUS})."
+            echo "$SYNC_OUTPUT" | while IFS= read -r line; do log_warn "  [sync] $line"; done
+            if [[ "${IDIARIO_SYNC_IGNORE_FAILURES:-true}" != "true" ]]; then
+                log_error "Abortando backup devido à falha na sincronização."
+                exit 1
+            fi
+        fi
+    else
+        log_warn "Diretório do i-Diário (${IDIARIO_PATH}) não encontrado. Pulando sincronização."
+    fi
+fi
+
+# ==============================================================================
 # 1. BACKUP DO I-EDUCAR
 # ==============================================================================
 if [[ "${IEDUCAR_ENABLED:-true}" == "true" ]]; then
