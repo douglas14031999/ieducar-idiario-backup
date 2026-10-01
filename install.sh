@@ -49,6 +49,29 @@ elif command -v yum &>/dev/null; then
     systemctl start crond >/dev/null 2>&1 || true
 fi
 
+# 2.1 Configuração Inteligente de SWAP (Otimização para Postgres & Rails)
+echo -e "${BLUE}Verificando configuração de memória SWAP...${NC}"
+SWAP_TOTAL=$(free -m | awk '/Swap:/ {print $2}')
+if [[ -z "$SWAP_TOTAL" || "$SWAP_TOTAL" -eq 0 ]]; then
+    echo -e "${YELLOW}Nenhum swap ativo detectado. Criando 4GB de SWAP para estabilidade...${NC}"
+    if [ ! -f /swapfile ]; then
+        fallocate -l 4G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=4096 status=none
+        chmod 600 /swapfile
+        mkswap /swapfile >/dev/null 2>&1
+    fi
+    swapon /swapfile 2>/dev/null || true
+    if ! grep -q "/swapfile" /etc/fstab; then
+        echo '/swapfile none swap sw 0 0' >> /etc/fstab
+    fi
+    sysctl -w vm.swappiness=10 >/dev/null 2>&1 || true
+    if ! grep -q "vm.swappiness" /etc/sysctl.conf; then
+        echo 'vm.swappiness=10' >> /etc/sysctl.conf
+    fi
+    echo -e "${GREEN}SWAP de 4GB criado e ativado com sucesso!${NC}"
+else
+    echo -e "${GREEN}SWAP já existente no sistema (${SWAP_TOTAL}MB). Nenhuma alteração necessária.${NC}"
+fi
+
 # 3. Preparar diretórios da aplicação
 echo -e "${BLUE}[2/6] Configurando diretório de instalação em ${INSTALL_DIR}...${NC}"
 mkdir -p "${CONFIG_DIR}"
