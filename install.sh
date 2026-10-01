@@ -63,7 +63,9 @@ else
     echo -e "${BLUE}Baixando os scripts mais recentes do repositório...${NC}"
     REPO_URL="${GITHUB_REPO_URL:-https://github.com/douglas14031999/ieducar-idiario-backup.git}"
     if [[ -d "${INSTALL_DIR}/.git" ]]; then
-        git -C "${INSTALL_DIR}" pull origin main || true
+        echo -e "${GREEN}Sincronizando arquivos com a versão mais recente...${NC}"
+        git -C "${INSTALL_DIR}" fetch origin main >/dev/null 2>&1 || true
+        git -C "${INSTALL_DIR}" reset --hard origin/main >/dev/null 2>&1 || true
     else
         rm -rf "${INSTALL_DIR}"
         if ! git clone "${REPO_URL}" "${INSTALL_DIR}" 2>/dev/null; then
