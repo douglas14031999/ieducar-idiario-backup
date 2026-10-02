@@ -290,14 +290,7 @@ server {
 }
 NGINX_IEDUCAR
 
-    # Criar bridge do intranet/index.php para o Laravel router
-    mkdir -p "${IEDUCAR_DIR}/public/intranet"
-    cat << 'EOF' > "${IEDUCAR_DIR}/public/intranet/index.php"
-<?php
-require_once dirname(__DIR__) . '/index.php';
-EOF
-    chown -R www-data:www-data "${IEDUCAR_DIR}/public/intranet"
-    chmod 644 "${IEDUCAR_DIR}/public/intranet/index.php"
+    rm -rf "${IEDUCAR_DIR}/public/intranet/index.php" 2>/dev/null || true
 
     ln -sf /etc/nginx/sites-available/ieducar.conf /etc/nginx/sites-enabled/ieducar.conf
     nginx -t && systemctl reload nginx || systemctl restart nginx

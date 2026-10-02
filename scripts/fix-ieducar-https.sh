@@ -96,15 +96,9 @@ if [[ ! -e "$PHP_SOCK" ]]; then
     fi
 fi
 
-# 4.1 Criar bridge para /intranet/index.php -> Laravel index.php (evita 404 pós-login)
-mkdir -p "${IEDUCAR_DIR}/public/intranet"
-cat << 'EOF' > "${IEDUCAR_DIR}/public/intranet/index.php"
-<?php
-require_once dirname(__DIR__) . '/index.php';
-EOF
-chown -R www-data:www-data "${IEDUCAR_DIR}/public/intranet"
-chmod 644 "${IEDUCAR_DIR}/public/intranet/index.php"
-echo -e "${GREEN}✓ Bridge '/intranet/index.php' criada com sucesso em public/intranet${NC}"
+# 4.1 Remover bridge anterior que causava loop de redirecionamento (ERR_TOO_MANY_REDIRECTS)
+rm -rf "${IEDUCAR_DIR}/public/intranet/index.php" 2>/dev/null || true
+echo -e "${GREEN}✓ Removido arquivo conflitante public/intranet/index.php${NC}"
 
 # 4.2 Gerar configuração limpa e validada do Nginx
 rm -f /etc/nginx/conf.d/ieducar.conf 2>/dev/null || true
