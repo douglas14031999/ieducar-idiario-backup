@@ -225,7 +225,7 @@ chmod -R 775 "${IEDUCAR_DIR}/storage" "${IEDUCAR_DIR}/bootstrap/cache" "${IEDUCA
 # Reiniciar PHP-FPM e Nginx
 systemctl daemon-reload 2>/dev/null || true
 systemctl restart php*-fpm 2>/dev/null || true
-nginx -t && systemctl reload nginx || systemctl restart nginx
+nginx -t && (systemctl restart nginx || systemctl start nginx)
 
 echo ""
 echo -e "${GREEN}======================================================================${NC}"
