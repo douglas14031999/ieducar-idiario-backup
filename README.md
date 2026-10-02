@@ -13,11 +13,12 @@ curl -fsSL https://raw.githubusercontent.com/douglas14031999/ieducar-idiario-bac
 ```
 
 Ao executar, o script abre uma **Central Interativa** no terminal, permitindo escolher facilmente o que deseja configurar:
-- `[1]` 🛡️ **Configurar Backups Automáticos** (MinIO, Cron 23:59, Retenção, SWAP)
+- `[1]` 🛡️ **Configurar Backups Automáticos** (MinIO, Cron 23:59, Retenção)
 - `[2]` 🧬 **Popular Banco de Dados** (24 Seeders essenciais do Educacenso)
 - `[3]` 🎨 **Configurar Tela de Atalhos Rápidos** (Dashboard moderno no i-Educar)
-- `[4]` 🔄 **Restaurar um Backup do MinIO** (Assistente de Restauração)
-- `[5]` ⚡ **Executar Teste de Backup Manual**
+- `[4]` ⚡ **Configurar / Otimizar Memória SWAP** (4GB + swappiness=10)
+- `[5]` 🔄 **Restaurar um Backup do MinIO** (Assistente de Restauração)
+- `[6]` 📦 **Executar Backup Manual Completo Agora**
 - `[0]` 🚪 **Sair**
 
 > 💡 *Após cada ação concluída, o script retorna automaticamente à tela inicial para que você possa efetuar outras operações sem precisar reiniciá-lo.*
@@ -68,6 +69,7 @@ cd /opt/ieducar-backup && git pull origin main
 │   ├── restore.sh              # Utilitário interativo de restauração
 │   ├── setup-dashboard.sh      # Configurador automático da tela de atalhos rápidos do i-Educar
 │   ├── seed-database.sh        # Povoamento inicial automatizado do banco de dados (24 seeders)
+│   ├── setup-swap.sh           # Configurador e otimizador de memória SWAP (4GB + swappiness)
 │   ├── install-minio.sh        # Instalador e configurador do MinIO Server 2025 e mc
 │   └── common.sh               # Funções de logging, checagem e notificações
 ├── .gitignore                  # Impede upload acidental de .env, logs e backups
@@ -145,6 +147,12 @@ ieducar-dashboard
 Para popular ou atualizar tabelas e registros essenciais do Educacenso e do i-Educar:
 ```bash
 ieducar-seed
+```
+
+### 7. Configurar / Otimizar Memória SWAP
+Para criar ou redefinir 4GB de SWAP com `vm.swappiness=10`:
+```bash
+ieducar-swap
 ```
 
 ---

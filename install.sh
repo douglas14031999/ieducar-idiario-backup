@@ -97,6 +97,7 @@ bootstrap_environment() {
     ln -sf "${INSTALL_DIR}/scripts/restore.sh" /usr/local/bin/ieducar-restore
     ln -sf "${INSTALL_DIR}/scripts/setup-dashboard.sh" /usr/local/bin/ieducar-dashboard
     ln -sf "${INSTALL_DIR}/scripts/seed-database.sh" /usr/local/bin/ieducar-seed
+    ln -sf "${INSTALL_DIR}/scripts/setup-swap.sh" /usr/local/bin/ieducar-swap
 }
 
 # ==============================================================================
@@ -188,30 +189,7 @@ EOF
     SWAP_TOTAL=$(free -m | awk '/Swap:/ {print $2}')
     if [[ -z "$SWAP_TOTAL" || "$SWAP_TOTAL" -eq 0 ]]; then
         echo ""
-        echo -e "${YELLOW}======================================================================${NC}"
-        echo -e "${YELLOW}       OTIMIZAÇÃO DE PERFORMANCE: NENHUM SWAP ATIVO DETECTADO         ${NC}"
-        echo -e "${YELLOW}======================================================================${NC}"
-        echo -e "O servidor não possui SWAP. Deseja criar e ativar 4GB com swappiness=10?"
-        
-        CREATE_SWAP="s"
-        read_input "Criar 4GB de SWAP agora? (S/n): " "s" CREATE_SWAP
-        if [[ "$CREATE_SWAP" =~ ^[sSyY]$ || -z "$CREATE_SWAP" ]]; then
-            echo -e "${BLUE}Criando e configurando 4GB de SWAP...${NC}"
-            if [ ! -f /swapfile ]; then
-                fallocate -l 4G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=4096 status=none
-                chmod 600 /swapfile
-                mkswap /swapfile >/dev/null 2>&1
-            fi
-            swapon /swapfile 2>/dev/null || true
-            if ! grep -q "/swapfile" /etc/fstab; then
-                echo '/swapfile none swap sw 0 0' >> /etc/fstab
-            fi
-            sysctl -w vm.swappiness=10 >/dev/null 2>&1 || true
-            if ! grep -q "vm.swappiness" /etc/sysctl.conf; then
-                echo 'vm.swappiness=10' >> /etc/sysctl.conf
-            fi
-            echo -e "${GREEN}SWAP de 4GB criado e ativado com sucesso!${NC}"
-        fi
+        "${INSTALL_DIR}/scripts/setup-swap.sh" || true
     fi
 
     # Resumo
@@ -259,7 +237,13 @@ action_setup_dashboard() {
     fi
 }
 
-# Ação 4: Restaurar um Backup existente
+# Ação 4: Configurar / Otimizar Memória SWAP
+action_configure_swap() {
+    echo ""
+    "${INSTALL_DIR}/scripts/setup-swap.sh" || true
+}
+
+# Ação 5: Restaurar um Backup existente
 action_restore() {
     echo ""
     echo -e "${CYAN}======================================================================${NC}"
@@ -268,7 +252,7 @@ action_restore() {
     "${INSTALL_DIR}/scripts/restore.sh" || true
 }
 
-# Ação 5: Executar Backup Manual Imediato
+# Ação 6: Executar Backup Manual Imediato
 action_test_backup() {
     echo ""
     echo -e "${CYAN}======================================================================${NC}"
@@ -298,6 +282,10 @@ case "${1:-}" in
         action_setup_dashboard
         exit 0
         ;;
+    --swap|-w)
+        action_configure_swap
+        exit 0
+        ;;
     --restore|-r)
         action_restore
         exit 0
@@ -311,16 +299,17 @@ while true; do
     echo -e "${CYAN}        i-Educar & i-Diário - Central de Ferramentas e Automação      ${NC}"
     echo -e "${CYAN}======================================================================${NC}"
     echo -e " Escolha a operação que deseja realizar no servidor:\n"
-    echo -e "   ${GREEN}[1]${NC} 🛡️  Configurar Backups Automáticos (MinIO, Cron 23:59, Retenção, SWAP)"
+    echo -e "   ${GREEN}[1]${NC} 🛡️  Configurar Backups Automáticos (MinIO, Cron 23:59, Retenção)"
     echo -e "   ${GREEN}[2]${NC} 🧬  Popular Banco de Dados do i-Educar (24 Seeders Iniciais Educacenso)"
     echo -e "   ${GREEN}[3]${NC} 🎨  Configurar Tela de Atalhos Rápidos (Dashboard Inicial do i-Educar)"
-    echo -e "   ${GREEN}[4]${NC} 🔄  Restaurar um Backup do MinIO (Assistente de Restauração)"
-    echo -e "   ${GREEN}[5]${NC} ⚡  Executar Backup Manual Completo Agora"
+    echo -e "   ${GREEN}[4]${NC} ⚡  Configurar / Otimizar Memória SWAP (4GB + swappiness=10)"
+    echo -e "   ${GREEN}[5]${NC} 🔄  Restaurar um Backup do MinIO (Assistente de Restauração)"
+    echo -e "   ${GREEN}[6]${NC} 📦  Executar Backup Manual Completo Agora"
     echo -e "   ${YELLOW}[0]${NC} 🚪  Sair"
     echo -e "${CYAN}======================================================================${NC}"
 
     CHOICE=""
-    read_input " Digite a opção desejada [0-5]: " "" CHOICE
+    read_input " Digite a opção desejada [0-6]: " "" CHOICE
 
     # Prevenção contra loop infinito em terminais não-interativos
     if [[ -z "$CHOICE" ]] && [ ! -e /dev/tty ]; then
@@ -339,9 +328,12 @@ while true; do
             action_setup_dashboard
             ;;
         4)
-            action_restore
+            action_configure_swap
             ;;
         5)
+            action_restore
+            ;;
+        6)
             action_test_backup
             ;;
         0|sair|exit|q)
@@ -351,7 +343,7 @@ while true; do
             exit 0
             ;;
         *)
-            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 5.${NC}"
+            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 6.${NC}"
             ;;
     esac
 
