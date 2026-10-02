@@ -121,6 +121,7 @@ bootstrap_environment() {
     ln -sf "${INSTALL_DIR}/scripts/setup-pmd-leaflet.sh" /usr/local/bin/ieducar-pmd
     ln -sf "${INSTALL_DIR}/scripts/setup-idiario-profile.sh" /usr/local/bin/idiario-perfil
     ln -sf "${INSTALL_DIR}/scripts/install-ieducar.sh" /usr/local/bin/ieducar-install
+    ln -sf "${INSTALL_DIR}/scripts/install-idiario.sh" /usr/local/bin/idiario-install
 
     render_progress_bar 100 "Carregamento concluído com êxito!"
     echo ""
@@ -309,6 +310,12 @@ action_install_ieducar() {
     "${INSTALL_DIR}/scripts/install-ieducar.sh" || true
 }
 
+# Ação: Instalar i-Diário Completo
+action_install_idiario() {
+    echo ""
+    "${INSTALL_DIR}/scripts/install-idiario.sh" || true
+}
+
 # ==============================================================================
 # MENU PRINCIPAL INTERATIVO
 # ==============================================================================
@@ -318,8 +325,12 @@ bootstrap_environment
 
 # Se foi passado algum argumento direto via linha de comando
 case "${1:-}" in
-    --install|-install|--install-ieducar)
+    --install-ieducar|--install|-install)
         action_install_ieducar
+        exit 0
+        ;;
+    --install-idiario|-idiario)
+        action_install_idiario
         exit 0
         ;;
     --backup|-b)
@@ -360,19 +371,20 @@ while true; do
     echo -e "${CYAN}======================================================================${NC}"
     echo -e " Escolha a operação que deseja realizar no servidor:\n"
     echo -e "   ${GREEN}[1]${NC} 🚀  Instalar i-Educar Completo (Core + Relatórios, Biblioteca, Censo, PMD)"
-    echo -e "   ${GREEN}[2]${NC} 🛡️  Configurar Backups Automáticos (MinIO, Cron 23:59, Retenção)"
-    echo -e "   ${GREEN}[3]${NC} 🧬  Popular Banco de Dados do i-Educar (24 Seeders Iniciais Educacenso)"
-    echo -e "   ${GREEN}[4]${NC} 🎨  Configurar Tela de Atalhos Rápidos (Dashboard Inicial do i-Educar)"
-    echo -e "   ${GREEN}[5]${NC} ⚡  Configurar / Otimizar Memória SWAP (4GB + swappiness=10)"
-    echo -e "   ${GREEN}[6]${NC} 🗺️  Migrar PMD para Leaflet/OpenStreetMap (Pré-Matrícula Digital)"
-    echo -e "   ${GREEN}[7]${NC} 👤  Corrigir Foto de Perfil & Menu no i-Diário"
-    echo -e "   ${GREEN}[8]${NC} 🔄  Restaurar um Backup do MinIO (Assistente de Restauração)"
-    echo -e "   ${GREEN}[9]${NC} 📦  Executar Backup Manual Completo Agora"
+    echo -e "   ${GREEN}[2]${NC} 📓  Instalar i-Diário Completo (Ruby 2.6, PostgreSQL, Sidekiq, Systemd)"
+    echo -e "   ${GREEN}[3]${NC} 🛡️  Configurar Backups Automáticos (MinIO, Cron 23:59, Retenção)"
+    echo -e "   ${GREEN}[4]${NC} 🧬  Popular Banco de Dados do i-Educar (24 Seeders Iniciais Educacenso)"
+    echo -e "   ${GREEN}[5]${NC} 🎨  Configurar Tela de Atalhos Rápidos (Dashboard Inicial do i-Educar)"
+    echo -e "   ${GREEN}[6]${NC} ⚡  Configurar / Otimizar Memória SWAP (4GB + swappiness=10)"
+    echo -e "   ${GREEN}[7]${NC} 🗺️  Migrar PMD para Leaflet/OpenStreetMap (Pré-Matrícula Digital)"
+    echo -e "   ${GREEN}[8]${NC} 👤  Corrigir Foto de Perfil & Menu no i-Diário"
+    echo -e "   ${GREEN}[9]${NC} 🔄  Restaurar um Backup do MinIO (Assistente de Restauração)"
+    echo -e "   ${GREEN}[10]${NC} 📦 Executar Backup Manual Completo Agora"
     echo -e "   ${YELLOW}[0]${NC} 🚪  Sair"
     echo -e "${CYAN}======================================================================${NC}"
 
     CHOICE=""
-    read_input " Digite a opção desejada [0-9]: " "" CHOICE
+    read_input " Digite a opção desejada [0-10]: " "" CHOICE
 
     # Prevenção contra loop infinito em terminais não-interativos
     if [[ -z "$CHOICE" ]] && [ ! -e /dev/tty ]; then
@@ -385,27 +397,30 @@ while true; do
             action_install_ieducar
             ;;
         2)
-            action_configure_backups
+            action_install_idiario
             ;;
         3)
-            action_seed_database
+            action_configure_backups
             ;;
         4)
-            action_setup_dashboard
+            action_seed_database
             ;;
         5)
-            action_configure_swap
+            action_setup_dashboard
             ;;
         6)
-            action_setup_pmd
+            action_configure_swap
             ;;
         7)
-            action_setup_idiario_profile
+            action_setup_pmd
             ;;
         8)
-            action_restore
+            action_setup_idiario_profile
             ;;
         9)
+            action_restore
+            ;;
+        10)
             action_test_backup
             ;;
         0|sair|exit|q)
@@ -415,7 +430,7 @@ while true; do
             exit 0
             ;;
         *)
-            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 9.${NC}"
+            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 10.${NC}"
             ;;
     esac
 

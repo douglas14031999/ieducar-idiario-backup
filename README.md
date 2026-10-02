@@ -52,6 +52,7 @@ cd /opt/ieducar-backup && git pull origin main
 - 🧹 **Retenção Automática de 20 Dias:** Remove arquivos temporários e expurga backups antigos (> 20 dias) do MinIO e do disco local automaticamente.
 - 🔐 **Repositório 100% Seguro para GitHub Público:** Nenhuma senha ou segredo fica gravado no código. A configuração é gerada em `/etc/ieducar-backup/.env` com permissão estrita `chmod 600`.
 - 🚀 **Instalador Completo i-Educar + Todos os Módulos:** Instalação automatizada fim a fim do Core 2.10, PostgreSQL, Composer, Nginx, PHP 8.4, JasperStarter/Relatórios, Biblioteca, Educacenso, Transporte Escolar e Pré-Matrícula Digital (`ieducar-install`).
+- 📓 **Instalador Completo i-Diário (Rails):** Instalação automatizada do i-Diário com Ruby 2.6.6 compilado via rbenv + OpenSSL 1.1.1 dedicado, PostgreSQL, Redis, Sidekiq, serviços Systemd e usuário API (`idiario-install`).
 - 🔄 **Assistente de Restauração (Disaster Recovery):** Utilitário prático para baixar e restaurar bancos e arquivos do MinIO em caso de emergência (`ieducar-restore`).
 - 🎨 **Painel de Atalhos Rápidos (Opcional):** Transforma a tela inicial do i-Educar com 5 cards modernos de navegação direta (Alunos, Servidores, Relatórios por Turma, Boletim e Histórico Escolar). Perguntado na instalação ou ativável via comando `ieducar-dashboard`.
 - 🧬 **Povoamento Inicial do Banco (Opcional):** Conjunto de 24 seeders essenciais (Deficiências, Raças, Escolaridade Educacenso, Funções, Módulos, Regimes, Níveis de Ensino, Situações de Matrícula, etc.). Perguntado na instalação ou via comando `ieducar-seed`.
@@ -70,6 +71,7 @@ cd /opt/ieducar-backup && git pull origin main
 │   └── backup.env.example      # Modelo completo de variáveis de ambiente
 ├── scripts/
 │   ├── install-ieducar.sh      # Instalador completo automatizado do i-Educar e todos os módulos
+│   ├── install-idiario.sh      # Instalador completo automatizado do i-Diário (Rails/Ruby 2.6)
 │   ├── backup.sh               # Script principal executado pelo cron (dumps, sync e MinIO)
 │   ├── restore.sh              # Utilitário interativo de restauração
 │   ├── setup-dashboard.sh      # Configurador automático da tela de atalhos rápidos do i-Educar
@@ -178,6 +180,12 @@ idiario-perfil
 Para rodar a instalação do zero do Core do i-Educar com Relatórios, Biblioteca, Educacenso, Transporte e Pré-Matrícula Digital:
 ```bash
 ieducar-install
+```
+
+### 12. Instalar i-Diário Completo (Rails)
+Para instalar do zero o i-Diário com Ruby 2.6.6 compilado, PostgreSQL, Redis, Sidekiq e serviços no systemd:
+```bash
+idiario-install
 ```
 
 ---
