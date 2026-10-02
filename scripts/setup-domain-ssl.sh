@@ -363,14 +363,24 @@ NGINX_IEDUCAR
     chown -R www-data:www-data "${IEDUCAR_DIR}/storage" "${IEDUCAR_DIR}/bootstrap/cache" "${IEDUCAR_DIR}/public" "${IEDUCAR_DIR}/tmp" 2>/dev/null || true
     chmod -R 775 "${IEDUCAR_DIR}/storage" "${IEDUCAR_DIR}/bootstrap/cache" "${IEDUCAR_DIR}/tmp" 2>/dev/null || true
 
-    # Link de compatibilidade do JasperReports para carregamento de logos e brasões (/storage)
+    # Permissão de execução no JasperStarter (Passo 19)
+    local jasper_bin="${IEDUCAR_DIR}/vendor/cossou/jasperphp/src/JasperStarter/bin/jasperstarter"
+    if [[ -f "$jasper_bin" ]]; then
+        chmod +x "$jasper_bin" 2>/dev/null || true
+    fi
+
+    # Link de compatibilidade do JasperReports para carregamento de logos e brasões (Passo 20)
+    mkdir -p /storage "${IEDUCAR_DIR}/storage/app/public/ieducar" 2>/dev/null || true
+    if [[ -e "${IEDUCAR_DIR}/public/storage/ieducar" ]]; then
+        ln -sfn "${IEDUCAR_DIR}/public/storage/ieducar" /storage/ieducar
+    elif [[ -e "${IEDUCAR_DIR}/storage/app/public/ieducar" ]]; then
+        ln -sfn "${IEDUCAR_DIR}/storage/app/public/ieducar" /storage/ieducar
+    fi
     if [[ ! -d /storage || -L /storage ]]; then
-        ln -sfn "${IEDUCAR_DIR}/storage/app/public" /storage
+        ln -sfn "${IEDUCAR_DIR}/storage/app/public" /storage 2>/dev/null || true
     fi
-    if [[ -d "${IEDUCAR_DIR}/storage/ieducar" && ! -e /storage/ieducar ]]; then
-        mkdir -p /storage
-        ln -sfn "${IEDUCAR_DIR}/storage/ieducar" /storage/ieducar
-    fi
+    chmod -R 775 /storage "${IEDUCAR_DIR}/storage" 2>/dev/null || true
+    chown -R www-data:www-data /storage "${IEDUCAR_DIR}/storage" 2>/dev/null || true
 
     systemctl restart php*-fpm 2>/dev/null || true
     systemctl daemon-reload 2>/dev/null || true

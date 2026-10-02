@@ -308,14 +308,6 @@ if [[ -f "$JASPER_BIN" ]]; then
     echo -e "${GREEN}✓ Permissão executável garantida para JasperStarter.${NC}"
 fi
 
-# Link de compatibilidade do JasperReports para carregamento de logos e brasões (/storage)
-if [[ ! -d /storage || -L /storage ]]; then
-    ln -sfn "${IEDUCAR_DIR}/storage/app/public" /storage
-fi
-if [[ -d "${IEDUCAR_DIR}/storage/ieducar" && ! -e /storage/ieducar ]]; then
-    mkdir -p /storage
-    ln -sfn "${IEDUCAR_DIR}/storage/ieducar" /storage/ieducar
-fi
 
 echo -e "${YELLOW}[12/16] Instalando Módulo de Biblioteca...${NC}"
 if [[ ! -d "$IEDUCAR_DIR/packages/portabilis/i-educar-library-package" ]]; then
@@ -419,12 +411,19 @@ REPORTS_LOGO_DIR="$IEDUCAR_DIR/ieducar/modules/Reports/ReportLogos"
 mkdir -p "$REPORTS_LOGO_DIR"
 chmod -R 777 "$REPORTS_LOGO_DIR" 2>/dev/null || true
 
-# Correção de Ficha do Servidor (/storage/ieducar symlink)
-mkdir -p /storage
-if [[ ! -e /storage/ieducar ]]; then
-    ln -sf "${IEDUCAR_DIR}/public/storage/ieducar" /storage/ieducar || true
-    echo -e "${GREEN}✓ Link simbólico legado /storage/ieducar criado para Ficha do Servidor.${NC}"
+# Correção de Ficha do Servidor e Relatórios Jasper (/storage e /storage/ieducar)
+mkdir -p /storage "${IEDUCAR_DIR}/storage/app/public/ieducar" 2>/dev/null || true
+if [[ -e "${IEDUCAR_DIR}/public/storage/ieducar" ]]; then
+    ln -sfn "${IEDUCAR_DIR}/public/storage/ieducar" /storage/ieducar
+elif [[ -e "${IEDUCAR_DIR}/storage/app/public/ieducar" ]]; then
+    ln -sfn "${IEDUCAR_DIR}/storage/app/public/ieducar" /storage/ieducar
 fi
+if [[ ! -d /storage || -L /storage ]]; then
+    ln -sfn "${IEDUCAR_DIR}/storage/app/public" /storage 2>/dev/null || true
+fi
+chmod -R 775 /storage "$IEDUCAR_DIR/storage" 2>/dev/null || true
+chown -R www-data:www-data /storage "$IEDUCAR_DIR/storage" 2>/dev/null || true
+echo -e "${GREEN}✓ Link simbólico /storage/ieducar e permissões configurados para relatórios e Ficha do Servidor.${NC}"
 
 # Reiniciar serviços
 systemctl restart "php${PHP_VER}-fpm" || true
