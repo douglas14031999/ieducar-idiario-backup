@@ -59,6 +59,7 @@ cd /opt/ieducar-backup && git pull origin main
 - 🗺️ **Migração PMD Leaflet (Opcional):** Migra a Pré-Matrícula Digital do Google Maps para Leaflet + OpenStreetMap sem custo de API (`ieducar-pmd`).
 - 👤 **Correção de Foto & Menu no i-Diário (Opcional):** Corrige o envio/corte de foto de perfil (Cropper JS), ImageMagick, rotas de upload e ativa atalhos no secrets.yml (`idiario-perfil`).
 - 📑 **Diário de Classe Escolar Unificado (i-Diário):** Emite em um único PDF mesclado a Capa Oficial, Frequência, Notas, Avaliações Descritivas/Pareceres, Conteúdos, Observações e 2ª assinatura (`idiario-diario-unificado`).
+- 🎯 **Gabarito OMR & Elaborador de Provas (BNCC):** Sistema autohospedável para elaboração de avaliações, geração de folhas de respostas em PDF e correção instantânea por visão computacional via smartphone (`omr-install`).
 - 🔔 **Notificações:** Suporte a webhooks de alerta no Discord e Telegram.
 
 ---
@@ -74,6 +75,7 @@ cd /opt/ieducar-backup && git pull origin main
 │   ├── install-ieducar.sh      # Instalador completo automatizado do i-Educar e todos os módulos
 │   ├── install-idiario.sh      # Instalador completo automatizado do i-Diário (Rails/Ruby 2.6)
 │   ├── setup-idiario-class-diary.sh # Diário de Classe Escolar Unificado para o i-Diário
+│   ├── install-omr.sh          # Instalador do Gabarito OMR & Elaborador de Provas (BNCC)
 │   ├── backup.sh               # Script principal executado pelo cron (dumps, sync e MinIO)
 │   ├── restore.sh              # Utilitário interativo de restauração
 │   ├── setup-dashboard.sh      # Configurador automático da tela de atalhos rápidos do i-Educar
@@ -194,6 +196,12 @@ idiario-install
 Para instalar o módulo de Diário de Classe Unificado com Capa Oficial, mesclagem de PDFs (qpdf), relatórios descritivos, menus e rotas:
 ```bash
 idiario-diario-unificado
+```
+
+### 14. Instalar Gabarito OMR & Elaborador de Provas (BNCC)
+Para implantar o sistema open-source de elaboração de provas, geração de folhas de respostas e correção por visão computacional (FastAPI, OpenCV, PostgreSQL e Nginx):
+```bash
+omr-install
 ```
 
 ---
