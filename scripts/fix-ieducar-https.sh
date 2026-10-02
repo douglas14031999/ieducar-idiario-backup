@@ -106,30 +106,107 @@ chown -R www-data:www-data "${IEDUCAR_DIR}/public/intranet"
 chmod 644 "${IEDUCAR_DIR}/public/intranet/index.php"
 echo -e "${GREEN}✓ Bridge '/intranet/index.php' criada com sucesso em public/intranet${NC}"
 
-# 4.2 Ajustar bloco de Nginx se existir
-for conf in /etc/nginx/sites-available/ieducar.conf /etc/nginx/conf.d/ieducar.conf; do
-    if [[ -f "$conf" ]]; then
-        # Remover bloqueio 404 do snippets fastcgi que impede rotas .php do Laravel
-        sed -i 's|include snippets/fastcgi-php.conf;|fastcgi_split_path_info ^(.+\\.php)(/.+)$;\\n        try_files $uri /index.php?\\$query_string;|g' "$conf"
+# 4.2 Gerar configuração limpa e validada do Nginx
+rm -f /etc/nginx/conf.d/ieducar.conf 2>/dev/null || true
+mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
 
-        # Adicionar error_page 404 /index.php se não existir
-        if ! grep -q "error_page 404 /index.php;" "$conf"; then
-            sed -i '/location \/ {/i \    error_page 404 /index.php;\n' "$conf"
-        fi
+if [[ -f "/etc/letsencrypt/live/${DOMAIN}/fullchain.pem" ]]; then
+    cat << NGINX_CONF > /etc/nginx/sites-available/ieducar.conf
+server {
+    server_name ${DOMAIN};
+    root ${IEDUCAR_DIR}/public;
+    index index.php index.html;
 
-        # Adicionar parâmetros de HTTPS no FastCGI se não existirem
-        if ! grep -q "fastcgi_param HTTPS" "$conf"; then
-            sed -i '/include fastcgi_params;/a \        fastcgi_param HTTPS on;\n        fastcgi_param HTTP_X_FORWARDED_PROTO https;\n        fastcgi_param HTTP_X_FORWARDED_SSL on;' "$conf"
-            echo -e "${GREEN}✓ Parâmetros FastCGI HTTPS injetados em $conf${NC}"
-        fi
-        
-        # Adicionar bloco estático otimizado se não existir
-        if ! grep -q "location ~\* \\.(jpg|jpeg" "$conf"; then
-            sed -i '/location \/ {/i \    location ~* \\.(jpg|jpeg|gif|png|css|js|ico|svg|woff|woff2|ttf|eot)$ {\n        expires 30d;\n        access_log off;\n        try_files $uri =404;\n    }\n' "$conf"
-            echo -e "${GREEN}✓ Bloco de arquivos estáticos injetado em $conf${NC}"
-        fi
-    fi
-done
+    client_max_body_size 50M;
+    proxy_read_timeout 300s;
+    fastcgi_read_timeout 300s;
+
+    error_page 404 /index.php;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    location ~* \.(jpg|jpeg|gif|png|css|js|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 30d;
+        access_log off;
+        try_files \$uri =404;
+    }
+
+    location ~ \.php$ {
+        try_files \$uri /index.php?\$query_string;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass unix:${PHP_SOCK};
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include fastcgi_params;
+        fastcgi_param HTTPS on;
+        fastcgi_param HTTP_X_FORWARDED_PROTO https;
+        fastcgi_param HTTP_X_FORWARDED_SSL on;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+
+    listen 443 ssl;
+    listen [::]:443 ssl;
+    ssl_certificate /etc/letsencrypt/live/${DOMAIN}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${DOMAIN}/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${DOMAIN};
+    return 301 https://\$host\$request_uri;
+}
+NGINX_CONF
+else
+    cat << NGINX_CONF > /etc/nginx/sites-available/ieducar.conf
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${DOMAIN};
+    root ${IEDUCAR_DIR}/public;
+    index index.php index.html;
+
+    client_max_body_size 50M;
+    proxy_read_timeout 300s;
+    fastcgi_read_timeout 300s;
+
+    error_page 404 /index.php;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    location ~* \.(jpg|jpeg|gif|png|css|js|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 30d;
+        access_log off;
+        try_files \$uri =404;
+    }
+
+    location ~ \.php$ {
+        try_files \$uri /index.php?\$query_string;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass unix:${PHP_SOCK};
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+NGINX_CONF
+fi
+
+ln -sf /etc/nginx/sites-available/ieducar.conf /etc/nginx/sites-enabled/ieducar.conf
+echo -e "${GREEN}✓ Configuração do Nginx atualizada com sucesso sem erros de sintaxe${NC}"
 
 echo -e "${YELLOW}[5/6] Limpando caches compilados do Laravel (Blade, Config, Views)...${NC}"
 cd "$IEDUCAR_DIR"
