@@ -45,9 +45,25 @@ read_input() {
     eval "$var_name=\"\${user_val:-$default_val}\""
 }
 
+# Função para desenhar a barra de progresso elegante no terminal
+render_progress_bar() {
+    local percent=$1
+    local text="$2"
+    local width=28
+    local filled=$(( percent * width / 100 ))
+    local empty=$(( width - filled ))
+    local bar=""
+
+    for ((i=0; i<filled; i++)); do bar+="█"; done
+    for ((i=0; i<empty; i++)); do bar+="░"; done
+
+    printf "\r ${CYAN}[${GREEN}%s${CYAN}] ${YELLOW}%3d%%${NC} - %-36s" "$bar" "$percent" "$text"
+}
+
 # 2. Inicialização e sincronização dos arquivos do repositório
 bootstrap_environment() {
-    echo -e "${BLUE}Inicializando ambiente e dependências básicas...${NC}"
+    echo ""
+    render_progress_bar 10 "Verificando privilégios e ambiente..."
     export DEBIAN_FRONTEND=noninteractive
 
     # Instalação rápida de ferramentas essenciais se não existirem
@@ -58,6 +74,7 @@ bootstrap_environment() {
         fi
     done
 
+    render_progress_bar 35 "Verificando dependências básicas..."
     if [[ ${#pkgs_needed[@]} -gt 0 ]]; then
         if command -v apt-get &>/dev/null; then
             apt-get update -y >/dev/null 2>&1 || true
@@ -67,9 +84,11 @@ bootstrap_environment() {
         fi
     fi
 
+    render_progress_bar 60 "Preparando diretórios do sistema..."
     mkdir -p "${CONFIG_DIR}"
     mkdir -p "/var/backups/ieducar-idiario"
 
+    render_progress_bar 80 "Sincronizando scripts e módulos..."
     # Se já estiver rodando dentro da pasta clonada, copia; senão faz download/atualização
     if [[ -f "$(pwd)/scripts/backup.sh" ]]; then
         mkdir -p "${INSTALL_DIR}"
@@ -88,6 +107,7 @@ bootstrap_environment() {
         fi
     fi
 
+    render_progress_bar 95 "Registrando comandos globais..."
     # Permissões executáveis
     chmod +x "${INSTALL_DIR}/scripts/"*.sh "${INSTALL_DIR}/install.sh" 2>/dev/null || true
 
@@ -98,6 +118,13 @@ bootstrap_environment() {
     ln -sf "${INSTALL_DIR}/scripts/setup-dashboard.sh" /usr/local/bin/ieducar-dashboard
     ln -sf "${INSTALL_DIR}/scripts/seed-database.sh" /usr/local/bin/ieducar-seed
     ln -sf "${INSTALL_DIR}/scripts/setup-swap.sh" /usr/local/bin/ieducar-swap
+
+    render_progress_bar 100 "Carregamento concluído com êxito!"
+    echo ""
+    sleep 0.5
+
+    # Limpar a tela para abrir o menu limpo no início do terminal
+    clear 2>/dev/null || printf "\033c" || true
 }
 
 # ==============================================================================
@@ -294,7 +321,7 @@ esac
 
 # Loop do Menu Principal
 while true; do
-    echo ""
+    clear 2>/dev/null || printf "\033c" || true
     echo -e "${CYAN}======================================================================${NC}"
     echo -e "${CYAN}        i-Educar & i-Diário - Central de Ferramentas e Automação      ${NC}"
     echo -e "${CYAN}======================================================================${NC}"
