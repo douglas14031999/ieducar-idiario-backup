@@ -14,6 +14,7 @@ YELLOW='\033[1;33m'
 BLUE='\033[0;34m'
 CYAN='\033[0;36m'
 MAGENTA='\033[0;35m'
+BOLD='\033[1m'
 NC='\033[0m'
 
 # Função para leitura interativa ou fallback
@@ -36,17 +37,100 @@ read_prompt() {
     fi
 }
 
-echo -e "${BLUE}======================================================================${NC}"
-echo -e "${BLUE}   🔒 CONFIGURADOR DE DOMÍNIOS & SSL HTTPS (I-EDUCAR & I-DIÁRIO)      ${NC}"
-echo -e "${BLUE}======================================================================${NC}"
-echo -e "Este utilitário automatiza:"
-echo -e " • Configuração de VirtualHost do Nginx com HTTP/2, Gzip e Timeouts"
-echo -e " • Emissão e renovação automática de Certificado SSL grátis (Let's Encrypt)"
-echo -e " • Redirecionamento forçado de HTTP para HTTPS (Porta 80 -> 443)"
-echo -e " • Atualização do APP_URL no .env do i-Educar"
-echo -e " • ${YELLOW}Atualização automática do Domínio da Entidade no banco do i-Diário${NC}"
-echo -e "   (substituindo o IP fixo configurado na instalação)"
-echo -e "${BLUE}======================================================================${NC}\n"
+# Detecção antecipada do IP Público da VPS
+SERVER_IP=$(curl -s -4 --max-time 3 https://icanhazip.com 2>/dev/null || curl -s -4 --max-time 3 https://api.ipify.org 2>/dev/null || hostname -I 2>/dev/null | awk '{print $1}')
+SERVER_IP="${SERVER_IP:-127.0.0.1}"
+
+# ==============================================================================
+# GUIA DE INSTRUÇÕES DE APONTAMENTO DE DOMÍNIO
+# ==============================================================================
+show_dns_instructions() {
+    clear 2>/dev/null || printf "\033c" || true
+    echo -e "${BLUE}======================================================================${NC}"
+    echo -e "${BLUE}   🔒 CONFIGURADOR DE DOMÍNIOS & SSL HTTPS (I-EDUCAR & I-DIÁRIO)      ${NC}"
+    echo -e "${BLUE}======================================================================${NC}"
+    echo -e "Este utilitário automatiza a configuração do Nginx, certificados SSL (Let's Encrypt)"
+    echo -e "e a ${YELLOW}substituição automática do IP pelo domínio no banco de dados do i-Diário${NC}."
+    echo -e "${BLUE}----------------------------------------------------------------------${NC}\n"
+
+    echo -e "${CYAN}======================================================================${NC}"
+    echo -e "${CYAN}   📋 INSTRUÇÕES PRÉVIAS: CONFIGURAÇÃO E APONTAMENTO DE DOMÍNIO (DNS) ${NC}"
+    echo -e "${CYAN}======================================================================${NC}"
+    echo -e "Antes de emitir o certificado SSL, você precisa criar os apontamentos ${YELLOW}Tipo A${NC}"
+    echo -e "no painel onde gerencia o seu domínio (Cloudflare, Registro.br, Hostinger,"
+    echo -e "GoDaddy, AWS Route 53, cPanel, etc.):\n"
+    echo -e "  🌐 ${BOLD}IP Público Desta VPS:${NC}  ${GREEN}${SERVER_IP}${NC}\n"
+    echo -e "  ┌──────────────────┬─────────────┬───────────────────────────────┬──────────────────────┐"
+    echo -e "  │ Aplicação        │ Tipo        │ Nome / Entrada (Host)         │ Valor / Destino (IP) │"
+    echo -e "  ├──────────────────┼─────────────┼───────────────────────────────┼──────────────────────┤"
+    echo -e "  │ ${GREEN}i-Educar${NC}         │ ${YELLOW}A${NC}           │ ieducar (ou seu subdomínio)   │ ${GREEN}${SERVER_IP}${NC}         │"
+    echo -e "  │ ${GREEN}i-Diário${NC}         │ ${YELLOW}A${NC}           │ idiario (ou seu subdomínio)   │ ${GREEN}${SERVER_IP}${NC}         │"
+    echo -e "  └──────────────────┴─────────────┴───────────────────────────────┴──────────────────────┘\n"
+    echo -e "  📌 ${YELLOW}Exemplo de configuração (se o seu domínio for 'suacidade.gov.br'):${NC}"
+    echo -e "     • i-Educar: ${CYAN}ieducar.suacidade.gov.br${NC}  ->  Aponta (Tipo A) para ${GREEN}${SERVER_IP}${NC}"
+    echo -e "     • i-Diário: ${CYAN}idiario.suacidade.gov.br${NC}  ->  Aponta (Tipo A) para ${GREEN}${SERVER_IP}${NC}\n"
+    echo -e "  ⚠️  ${YELLOW}ATENÇÃO AOS PONTOS CRÍTICOS ANTES DE AVANÇAR:${NC}"
+    echo -e "     1. ${BOLD}Se utilizar Cloudflare:${NC} Deixe a nuvem laranja desativada (${YELLOW}DNS Only / Cinza${NC})"
+    echo -e "        durante a emissão inicial. O proxy ativo pode bloquear o desafio HTTP do Let's Encrypt."
+    echo -e "        Após emitir o SSL com sucesso, você poderá reativar o proxy em modo 'Full (Strict)'."
+    echo -e "     2. ${BOLD}Portas 80 e 443:${NC} Devem estar abertas no firewall da sua VPS e no painel da nuvem."
+    echo -e "     3. ${BOLD}Propagação de DNS:${NC} Aguarde 1 a 3 minutos após salvar no painel de DNS."
+    echo -e "${CYAN}======================================================================${NC}\n"
+}
+
+# Menu prévio para garantir que o usuário está pronto
+while true; do
+    show_dns_instructions
+    echo -e "Você já configurou os apontamentos de DNS para o IP ${GREEN}${SERVER_IP}${NC}?"
+    echo -e "   ${GREEN}[1]${NC} ✅ Sim, já realizei os apontamentos e quero continuar"
+    echo -e "   ${YELLOW}[2]${NC} 🔍 Testar apontamento de um domínio agora (Verificar propagação)"
+    echo -e "   ${RED}[0]${NC} 🚪 Voltar / Cancelar (Vou acessar o painel de DNS primeiro)"
+    echo ""
+
+    PRE_CHOICE="1"
+    read_prompt "Selecione uma opção [0-2]" "1" PRE_CHOICE
+
+    case "$PRE_CHOICE" in
+        1)
+            echo -e "\n${GREEN}Iniciando a configuração dos domínios e certificados SSL...${NC}\n"
+            break
+            ;;
+        2)
+            echo ""
+            TEST_DOMAIN=""
+            read_prompt "Digite o domínio para testar (ex: ieducar.suacidade.gov.br)" "" TEST_DOMAIN
+            if [[ -n "$TEST_DOMAIN" ]]; then
+                echo -e "\n -> Consultando DNS para ${CYAN}${TEST_DOMAIN}${NC}..."
+                RESOLVED=$(getent ahosts "$TEST_DOMAIN" 2>/dev/null | awk '{print $1}' | head -n 1 || true)
+                if [[ -z "$RESOLVED" ]]; then
+                    echo -e "${RED}✗ Não foi possível resolver o domínio '${TEST_DOMAIN}'.${NC}"
+                    echo -e "O domínio ainda não possui registro A ativo ou ainda não propagou."
+                elif [[ "$RESOLVED" == "$SERVER_IP" ]]; then
+                    echo -e "${GREEN}✓ Perfeito! O domínio '${TEST_DOMAIN}' já está apontando para esta VPS (${SERVER_IP})!${NC}"
+                else
+                    echo -e "${YELLOW}! O domínio '${TEST_DOMAIN}' está apontando para '${RESOLVED}', diferente do IP desta VPS (${SERVER_IP}).${NC}"
+                    echo -e "Verifique se o registro A foi salvo com o IP correto (${SERVER_IP}) e aguarde a propagação."
+                fi
+                echo ""
+                if [ -e /dev/tty ]; then
+                    read -r -p "Pressione ENTER para continuar..." _ < /dev/tty || true
+                else
+                    read -r -p "Pressione ENTER para continuar..." _ || true
+                fi
+            fi
+            ;;
+        0|sair|exit|q)
+            echo ""
+            echo -e "${YELLOW}Operação cancelada. Quando concluir os apontamentos de DNS, execute novamente.${NC}"
+            echo ""
+            exit 0
+            ;;
+        *)
+            echo -e "\n${RED}Opção inválida! Escolha 1, 2 ou 0.${NC}"
+            sleep 1
+            ;;
+    esac
+done
 
 # 1. Verificar e instalar Certbot e Nginx
 echo -e "${YELLOW}[1/6] Verificando dependências do sistema (Nginx, Certbot)...${NC}"
@@ -61,7 +145,6 @@ if ! command -v certbot &>/dev/null || ! dpkg -l | grep -q "python3-certbot-ngin
     apt-get update -qq && apt-get install -y -qq certbot python3-certbot-nginx
 fi
 
-SERVER_IP=$(curl -s -4 https://icanhazip.com 2>/dev/null || hostname -I | awk '{print $1}')
 echo -e "${GREEN}✓ Dependências prontas. IP público da VPS: ${SERVER_IP}${NC}\n"
 
 # 2. Localizar instalações

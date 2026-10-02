@@ -213,10 +213,23 @@ omr-install
 ```
 
 ### 15. Configurar Domínios & SSL HTTPS (i-Educar & i-Diário)
-Para apontar seus domínios, configurar os blocos do Nginx, emitir certificados SSL Let's Encrypt com renovação automática e atualizar a entidade do banco de dados do i-Diário:
+Permite vincular domínios próprios ao i-Educar e ao i-Diário com emissão automática de certificados SSL gratuitos via Let's Encrypt (Certbot), renovação automática e atualização da entidade no PostgreSQL do i-Diário:
 ```bash
 ieducar-ssl
 ```
+
+#### 📋 Guia de Apontamento de DNS Prévio:
+Antes de executar o comando ou a opção `[11]` do menu, crie os registros do **Tipo A** no painel onde seu domínio é gerenciado (Cloudflare, Registro.br, Hostinger, GoDaddy, Route 53, etc.):
+
+| Aplicação | Tipo | Host / Subdomínio | Destino (IP da VPS) |
+|---|---|---|---|
+| **i-Educar** | `A` | `ieducar` (ou seu subdomínio) | `<IP_PUBLICO_DA_SUA_VPS>` |
+| **i-Diário** | `A` | `idiario` (ou seu subdomínio) | `<IP_PUBLICO_DA_SUA_VPS>` |
+
+> ⚠️ **Dicas Críticas:**
+> 1. **Cloudflare:** Deixe o proxy desativado (**Nuvem Cinza / DNS Only**) durante a emissão inicial para não bloquear o desafio HTTP do Certbot. Após emitir o certificado, você pode reativar a nuvem laranja com o SSL em modo *Full (Strict)*.
+> 2. **Portas 80 e 443:** Devem estar abertas no firewall do servidor (UFW) e no Security Group da nuvem (AWS, Oracle Cloud, Hetzner, etc.).
+> 3. **i-Diário (Banco de Dados):** O script substitui automaticamente o IP gravado na tabela `entities` do PostgreSQL pelo novo domínio HTTPS, evitando problemas de redirecionamento ou carregamento de ativos no Rails.
 
 ---
 
