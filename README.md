@@ -13,13 +13,19 @@ curl -fsSL https://raw.githubusercontent.com/douglas14031999/ieducar-idiario-bac
 ```
 
 Ao executar, o script abre uma **Central Interativa** no terminal, permitindo escolher facilmente o que deseja configurar:
-- `[1]` 🛡️ **Configurar Backups Automáticos** (MinIO, Cron 23:59, Retenção)
-- `[2]` 🧬 **Popular Banco de Dados** (24 Seeders essenciais do Educacenso)
-- `[3]` 🎨 **Configurar Tela de Atalhos Rápidos** (Dashboard moderno no i-Educar)
-- `[4]` ⚡ **Configurar / Otimizar Memória SWAP** (4GB + swappiness=10)
-- `[5]` 🗺️ **Migrar PMD para Leaflet/OpenStreetMap** (Pré-Matrícula Digital)
-- `[6]` 🔄 **Restaurar um Backup do MinIO** (Assistente de Restauração)
-- `[7]` 📦 **Executar Backup Manual Completo Agora**
+- `[1]` 🚀 **Instalar i-Educar Completo** (Core + Relatórios, Biblioteca, Censo, PMD)
+- `[2]` 📓 **Instalar i-Diário Completo** (Ruby 2.6, PostgreSQL, Sidekiq, Systemd)
+- `[3]` 🛡️ **Configurar Backups Automáticos** (MinIO, Cron 23:59, Retenção)
+- `[4]` 🧬 **Popular Banco de Dados** (24 Seeders essenciais do Educacenso)
+- `[5]` 🎨 **Configurar Tela de Atalhos Rápidos** (Dashboard moderno no i-Educar)
+- `[6]` ⚡ **Configurar / Otimizar Memória SWAP** (4GB + swappiness=10)
+- `[7]` 🗺️ **Migrar PMD para Leaflet/OpenStreetMap** (Pré-Matrícula Digital)
+- `[8]` 👤 **Corrigir Foto de Perfil & Menu no i-Diário**
+- `[9]` 📑 **Instalar Diário de Classe Escolar Unificado** (i-Diário)
+- `[10]` 🎯 **Instalar Gabarito OMR & Elaborador de Provas** (FastAPI, OpenCV)
+- `[11]` 🔒 **Configurar Domínios & SSL HTTPS** (i-Educar & i-Diário)
+- `[12]` 🔄 **Restaurar um Backup do MinIO** (Assistente de Restauração)
+- `[13]` 📦 **Executar Backup Manual Completo Agora**
 - `[0]` 🚪 **Sair**
 
 > 💡 *Após cada ação concluída, o script retorna automaticamente à tela inicial para que você possa efetuar outras operações sem precisar reiniciá-lo.*
@@ -60,6 +66,7 @@ cd /opt/ieducar-backup && git pull origin main
 - 👤 **Correção de Foto & Menu no i-Diário (Opcional):** Corrige o envio/corte de foto de perfil (Cropper JS), ImageMagick, rotas de upload e ativa atalhos no secrets.yml (`idiario-perfil`).
 - 📑 **Diário de Classe Escolar Unificado (i-Diário):** Emite em um único PDF mesclado a Capa Oficial, Frequência, Notas, Avaliações Descritivas/Pareceres, Conteúdos, Observações e 2ª assinatura (`idiario-diario-unificado`).
 - 🎯 **Gabarito OMR & Elaborador de Provas (BNCC):** Sistema autohospedável para elaboração de avaliações, geração de folhas de respostas em PDF e correção instantânea por visão computacional via smartphone (`omr-install`).
+- 🔒 **Configuração Automática de Domínio & SSL HTTPS (Let's Encrypt):** Permite informar apenas os domínios apontados para a VPS. O script configura automaticamente os blocos do Nginx, emite certificados SSL com renovação automática (Certbot) e, no **i-Diário**, substitui automaticamente o IP na tabela `entities` do PostgreSQL pelo novo domínio (`ieducar-ssl`).
 - 🔔 **Notificações:** Suporte a webhooks de alerta no Discord e Telegram.
 
 ---
@@ -76,6 +83,7 @@ cd /opt/ieducar-backup && git pull origin main
 │   ├── install-idiario.sh      # Instalador completo automatizado do i-Diário (Rails/Ruby 2.6)
 │   ├── setup-idiario-class-diary.sh # Diário de Classe Escolar Unificado para o i-Diário
 │   ├── install-omr.sh          # Instalador do Gabarito OMR & Elaborador de Provas (BNCC)
+│   ├── setup-domain-ssl.sh     # Automação de Nginx, SSL Certbot e migração de entidades do i-Diário
 │   ├── backup.sh               # Script principal executado pelo cron (dumps, sync e MinIO)
 │   ├── restore.sh              # Utilitário interativo de restauração
 │   ├── setup-dashboard.sh      # Configurador automático da tela de atalhos rápidos do i-Educar
@@ -202,6 +210,12 @@ idiario-diario-unificado
 Para implantar o sistema open-source de elaboração de provas, geração de folhas de respostas e correção por visão computacional (FastAPI, OpenCV, PostgreSQL e Nginx):
 ```bash
 omr-install
+```
+
+### 15. Configurar Domínios & SSL HTTPS (i-Educar & i-Diário)
+Para apontar seus domínios, configurar os blocos do Nginx, emitir certificados SSL Let's Encrypt com renovação automática e atualizar a entidade do banco de dados do i-Diário:
+```bash
+ieducar-ssl
 ```
 
 ---

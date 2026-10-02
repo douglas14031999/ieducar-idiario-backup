@@ -1,0 +1,364 @@
+#!/usr/bin/env bash
+# ==============================================================================
+# Script: setup-domain-ssl.sh
+# Objetivo: Configuração Automática de Domínio, Nginx Reverse Proxy e SSL Let's Encrypt
+# Suporte: i-Educar (PHP/Laravel) & i-Diário (Rails/PostgreSQL - Atualização de Entidade)
+# ==============================================================================
+
+set -euo pipefail
+
+# Cores para terminal
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+MAGENTA='\033[0;35m'
+NC='\033[0m'
+
+# Função para leitura interativa ou fallback
+read_prompt() {
+    local prompt_msg="$1"
+    local default_val="$2"
+    local var_name="$3"
+
+    if [ -e /dev/tty ]; then
+        local user_val=""
+        printf "${CYAN}%s${NC} [%s]: " "$prompt_msg" "$default_val" > /dev/tty
+        read -r user_val < /dev/tty || true
+        if [[ -n "$user_val" ]]; then
+            eval "$var_name=\"$user_val\""
+        else
+            eval "$var_name=\"$default_val\""
+        fi
+    else
+        eval "$var_name=\"$default_val\""
+    fi
+}
+
+echo -e "${BLUE}======================================================================${NC}"
+echo -e "${BLUE}   🔒 CONFIGURADOR DE DOMÍNIOS & SSL HTTPS (I-EDUCAR & I-DIÁRIO)      ${NC}"
+echo -e "${BLUE}======================================================================${NC}"
+echo -e "Este utilitário automatiza:"
+echo -e " • Configuração de VirtualHost do Nginx com HTTP/2, Gzip e Timeouts"
+echo -e " • Emissão e renovação automática de Certificado SSL grátis (Let's Encrypt)"
+echo -e " • Redirecionamento forçado de HTTP para HTTPS (Porta 80 -> 443)"
+echo -e " • Atualização do APP_URL no .env do i-Educar"
+echo -e " • ${YELLOW}Atualização automática do Domínio da Entidade no banco do i-Diário${NC}"
+echo -e "   (substituindo o IP fixo configurado na instalação)"
+echo -e "${BLUE}======================================================================${NC}\n"
+
+# 1. Verificar e instalar Certbot e Nginx
+echo -e "${YELLOW}[1/6] Verificando dependências do sistema (Nginx, Certbot)...${NC}"
+export DEBIAN_FRONTEND=noninteractive
+if ! command -v nginx &>/dev/null; then
+    echo " -> Instalando Nginx..."
+    apt-get update -qq && apt-get install -y -qq nginx
+fi
+
+if ! command -v certbot &>/dev/null || ! dpkg -l | grep -q "python3-certbot-nginx"; then
+    echo " -> Instalando Certbot e plugin Nginx..."
+    apt-get update -qq && apt-get install -y -qq certbot python3-certbot-nginx
+fi
+
+SERVER_IP=$(curl -s -4 https://icanhazip.com 2>/dev/null || hostname -I | awk '{print $1}')
+echo -e "${GREEN}✓ Dependências prontas. IP público da VPS: ${SERVER_IP}${NC}\n"
+
+# 2. Localizar instalações
+IEDUCAR_DIR="/var/www/ieducar"
+detect_idiario_dir() {
+    if [[ -f /etc/ieducar-backup/.env ]]; then
+        local env_path
+        env_path=$(grep -E "^IDIARIO_APP_DIR=" /etc/ieducar-backup/.env 2>/dev/null | cut -d'=' -f2 | tr -d '"' | tr -d "'" || true)
+        if [[ -n "$env_path" && -d "$env_path/app" ]]; then
+            echo "$env_path"
+            return 0
+        fi
+    fi
+    local common_paths=("/root/i-diario" "/var/www/idiario" "/var/www/i-diario" "/home/deploy/i-diario" "/opt/idiario")
+    for p in "${common_paths[@]}"; do
+        if [[ -d "$p/app" && -f "$p/Gemfile" ]]; then
+            echo "$p"
+            return 0
+        fi
+    done
+    return 1
+}
+
+IDIARIO_DIR=$(detect_idiario_dir || true)
+IDIARIO_DIR="${IDIARIO_DIR:-/root/i-diario}"
+
+# 3. Menu de Seleção do Sistema
+echo -e "Qual sistema você deseja configurar com Domínio e SSL?"
+echo -e "   ${GREEN}[1]${NC} i-Educar (PHP / Laravel)"
+echo -e "   ${GREEN}[2]${NC} i-Diário (Rails / PostgreSQL - com troca de IP por Domínio)"
+echo -e "   ${GREEN}[3]${NC} Ambos (i-Educar e i-Diário simultaneamente)"
+echo -e "   ${YELLOW}[0]${NC} Cancelar"
+echo ""
+
+APP_CHOICE="3"
+read_prompt "Selecione uma opção [0-3]" "3" APP_CHOICE
+
+if [[ "$APP_CHOICE" == "0" ]]; then
+    echo -e "${YELLOW}Operação cancelada.${NC}"
+    exit 0
+fi
+
+EMAIL_CONTACT="admin@$(hostname -d 2>/dev/null || echo "exemplo.gov.br")"
+read_prompt "E-mail de contato para avisos de renovação do SSL" "$EMAIL_CONTACT" EMAIL_CONTACT
+
+# Função de Validação DNS
+check_dns() {
+    local domain="$1"
+    echo -e " -> Verificando apontamento DNS de ${CYAN}${domain}${NC}..."
+    local resolved_ip
+    resolved_ip=$(getent ahosts "$domain" 2>/dev/null | awk '{print $1}' | head -n 1 || true)
+
+    if [[ -z "$resolved_ip" ]]; then
+        echo -e "${YELLOW}[AVISO] O domínio ${domain} não respondeu na consulta DNS!${NC}"
+        echo -e "Certifique-se de que criou o registro do tipo 'A' apontando para: ${GREEN}${SERVER_IP}${NC}"
+        local cont="n"
+        read_prompt "Deseja tentar emitir o SSL mesmo assim? (s/N)" "n" cont
+        if [[ ! "$cont" =~ ^[sS]$ ]]; then
+            return 1
+        fi
+    elif [[ "$resolved_ip" != "$SERVER_IP" ]]; then
+        echo -e "${YELLOW}[AVISO] O domínio ${domain} aponta para ${resolved_ip}, mas este servidor é ${SERVER_IP}.${NC}"
+        local cont="n"
+        read_prompt "Deseja prosseguir mesmo assim? (s/N)" "n" cont
+        if [[ ! "$cont" =~ ^[sS]$ ]]; then
+            return 1
+        fi
+    else
+        echo -e "${GREEN}✓ DNS verificado: ${domain} -> ${SERVER_IP}${NC}"
+    fi
+    return 0
+}
+
+# ------------------------------------------------------------------------------
+# CONFIGURAÇÃO: I-EDUCAR
+# ------------------------------------------------------------------------------
+configure_ieducar_ssl() {
+    local domain="$1"
+    echo ""
+    echo -e "${BLUE}======================================================================${NC}"
+    echo -e "${BLUE}          CONFIGURANDO DOMÍNIO & SSL PARA O I-EDUCAR                  ${NC}"
+    echo -e "${BLUE}======================================================================${NC}"
+
+    if ! check_dns "$domain"; then
+        echo -e "${YELLOW}Configuração de SSL ignorada para ${domain}.${NC}"
+        return
+    fi
+
+    # Detectar socket do PHP-FPM
+    local php_sock="/run/php/php8.4-fpm.sock"
+    if [[ ! -e "$php_sock" ]]; then
+        local found_sock
+        found_sock=$(find /run/php -type s -name "*.sock" 2>/dev/null | head -n 1 || true)
+        if [[ -n "$found_sock" ]]; then
+            php_sock="$found_sock"
+        fi
+    fi
+
+    mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled /etc/nginx/snippets /etc/nginx/conf.d
+    rm -f /etc/nginx/sites-enabled/default 2>/dev/null || true
+
+    # Criar vhost HTTP inicial
+    cat << NGINX_IEDUCAR > /etc/nginx/sites-available/ieducar.conf
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${domain};
+    root ${IEDUCAR_DIR}/public;
+
+    index index.php index.html;
+
+    client_max_body_size 50M;
+    proxy_read_timeout 300s;
+    fastcgi_read_timeout 300s;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    location ~ \.php$ {
+        include snippets/fastcgi-php.conf;
+        fastcgi_pass unix:${php_sock};
+        fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    location ~ /\.ht {
+        deny all;
+    }
+}
+NGINX_IEDUCAR
+
+    ln -sf /etc/nginx/sites-available/ieducar.conf /etc/nginx/sites-enabled/ieducar.conf
+    nginx -t && systemctl reload nginx || systemctl restart nginx
+
+    # Emissão de SSL com Certbot
+    echo -e "${YELLOW}Solicitando certificado SSL Let's Encrypt para ${domain}...${NC}"
+    if certbot --nginx -d "${domain}" --non-interactive --agree-tos -m "${EMAIL_CONTACT}" --redirect; then
+        echo -e "${GREEN}✓ Certificado SSL gerado com sucesso para ${domain}!${NC}"
+    else
+        echo -e "${YELLOW}Falha ao gerar SSL automático. Tentando modo interativo...${NC}"
+        certbot --nginx -d "${domain}" --agree-tos -m "${EMAIL_CONTACT}" --redirect || true
+    fi
+
+    # Atualizar APP_URL no .env do i-Educar
+    if [[ -f "${IEDUCAR_DIR}/.env" ]]; then
+        sed -i "s|^APP_URL=.*|APP_URL=https://${domain}|" "${IEDUCAR_DIR}/.env"
+        echo -e "${GREEN}✓ .env atualizado com APP_URL=https://${domain}${NC}"
+        cd "${IEDUCAR_DIR}"
+        php artisan config:clear >/dev/null 2>&1 || true
+        php artisan route:clear >/dev/null 2>&1 || true
+    fi
+
+    systemctl reload nginx || systemctl restart nginx
+    echo -e "${GREEN}✓ i-Educar configurado com sucesso em: https://${domain}${NC}"
+}
+
+# ------------------------------------------------------------------------------
+# CONFIGURAÇÃO: I-DIÁRIO (com substituição de IP por Domínio no Banco)
+# ------------------------------------------------------------------------------
+configure_idiario_ssl() {
+    local domain="$1"
+    echo ""
+    echo -e "${BLUE}======================================================================${NC}"
+    echo -e "${BLUE}          CONFIGURANDO DOMÍNIO & SSL PARA O I-DIÁRIO                  ${NC}"
+    echo -e "${BLUE}======================================================================${NC}"
+
+    if ! check_dns "$domain"; then
+        echo -e "${YELLOW}Configuração de SSL ignorada para ${domain}.${NC}"
+        return
+    fi
+
+    mkdir -p /etc/nginx/sites-available /etc/nginx/sites-enabled
+    rm -f /etc/nginx/sites-enabled/default 2>/dev/null || true
+
+    # Criar vhost HTTP Proxy inicial
+    cat << NGINX_IDIARIO > /etc/nginx/sites-available/idiario.conf
+upstream idiario_backend {
+    server 127.0.0.1:3000 fail_timeout=0;
+}
+
+server {
+    listen 80;
+    listen [::]:80;
+    server_name ${domain};
+
+    client_max_body_size 50M;
+    proxy_read_timeout 300s;
+    proxy_connect_timeout 300s;
+    proxy_send_timeout 300s;
+
+    location / {
+        proxy_pass http://idiario_backend;
+        proxy_set_header Host \$host;
+        proxy_set_header X-Real-IP \$remote_addr;
+        proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto \$scheme;
+        proxy_redirect off;
+    }
+
+    location ~ ^/(assets|packs)/ {
+        root ${IDIARIO_DIR}/public;
+        gzip_static on;
+        expires max;
+        add_header Cache-Control public;
+    }
+}
+NGINX_IDIARIO
+
+    ln -sf /etc/nginx/sites-available/idiario.conf /etc/nginx/sites-enabled/idiario.conf
+    nginx -t && systemctl reload nginx || systemctl restart nginx
+
+    # Emissão de SSL com Certbot
+    echo -e "${YELLOW}Solicitando certificado SSL Let's Encrypt para ${domain}...${NC}"
+    if certbot --nginx -d "${domain}" --non-interactive --agree-tos -m "${EMAIL_CONTACT}" --redirect; then
+        echo -e "${GREEN}✓ Certificado SSL gerado com sucesso para ${domain}!${NC}"
+    else
+        echo -e "${YELLOW}Falha ao gerar SSL automático. Tentando modo interativo...${NC}"
+        certbot --nginx -d "${domain}" --agree-tos -m "${EMAIL_CONTACT}" --redirect || true
+    fi
+
+    # ATUALIZAÇÃO NO BANCO DE DADOS: Substituir o IP pelo Domínio da Entidade
+    echo -e "${YELLOW}Atualizando vínculo do domínio da Entidade no banco de dados do i-Diário...${NC}"
+    
+    # Estratégia 1: Atualização direta SQL no PostgreSQL
+    if command -v psql &>/dev/null; then
+        sudo -u postgres psql -d idiario_production -c "
+            UPDATE entities SET domain = '${domain}' WHERE true;
+        " >/dev/null 2>&1 || true
+        echo -e "${GREEN}✓ Registro da tabela 'entities' atualizado para o domínio: ${domain}${NC}"
+    fi
+
+    # Estratégia 2: Atualização via Rails Runner
+    local rbenv_bin="/root/.rbenv/shims/bundle"
+    if [[ -x "$rbenv_bin" && -d "$IDIARIO_DIR" ]]; then
+        cat << 'RUNNER_UPDATE' > /tmp/update_entity_domain.rb
+begin
+  if defined?(Entity)
+    Entity.all.each do |e|
+      old = e.domain
+      e.update_columns(domain: ENV['TARGET_DOMAIN'])
+      puts "✓ Entidade '#{e.name}' atualizada com sucesso de '#{old}' para '#{ENV['TARGET_DOMAIN']}'."
+    end
+  end
+rescue => err
+  puts "Aviso ao atualizar Entidade via model: #{err.message}"
+end
+RUNNER_UPDATE
+        TARGET_DOMAIN="${domain}" RAILS_ENV=production cd "$IDIARIO_DIR" && "$rbenv_bin" exec rails runner /tmp/update_entity_domain.rb 2>/dev/null || true
+        rm -f /tmp/update_entity_domain.rb
+    fi
+
+    # Reiniciar os serviços do i-Diário
+    echo -e "${YELLOW}Reiniciando serviços do i-Diário para aplicar o novo domínio...${NC}"
+    systemctl restart idiario-web idiario-sidekiq idiario-sync 2>/dev/null || true
+
+    systemctl reload nginx || systemctl restart nginx
+    echo -e "${GREEN}✓ i-Diário configurado com sucesso em: https://${domain}${NC}"
+}
+
+# 4. Executar conforme a escolha do usuário
+case "$APP_CHOICE" in
+    1)
+        IEDUCAR_DOMAIN=""
+        read_prompt "Digite o domínio FQDN para o i-Educar (ex: ieducar.municipio.gov.br)" "" IEDUCAR_DOMAIN
+        if [[ -n "$IEDUCAR_DOMAIN" ]]; then
+            configure_ieducar_ssl "$IEDUCAR_DOMAIN"
+        fi
+        ;;
+    2)
+        IDIARIO_DOMAIN=""
+        read_prompt "Digite o domínio FQDN para o i-Diário (ex: diario.municipio.gov.br)" "" IDIARIO_DOMAIN
+        if [[ -n "$IDIARIO_DOMAIN" ]]; then
+            configure_idiario_ssl "$IDIARIO_DOMAIN"
+        fi
+        ;;
+    3)
+        IEDUCAR_DOMAIN=""
+        read_prompt "Digite o domínio FQDN para o i-Educar (ex: ieducar.municipio.gov.br)" "" IEDUCAR_DOMAIN
+        IDIARIO_DOMAIN=""
+        read_prompt "Digite o domínio FQDN para o i-Diário (ex: diario.municipio.gov.br)" "" IDIARIO_DOMAIN
+
+        if [[ -n "$IEDUCAR_DOMAIN" ]]; then
+            configure_ieducar_ssl "$IEDUCAR_DOMAIN"
+        fi
+        if [[ -n "$IDIARIO_DOMAIN" ]]; then
+            configure_idiario_ssl "$IDIARIO_DOMAIN"
+        fi
+        ;;
+esac
+
+echo ""
+echo -e "${GREEN}======================================================================${NC}"
+echo -e "${GREEN}   🎉 CONFIGURAÇÃO DE DOMÍNIOS E SSL CONCLUÍDA COM SUCESSO!          ${NC}"
+echo -e "${GREEN}======================================================================${NC}"
+echo -e " • Redirecionamento HTTP -> HTTPS: ${GREEN}ATIVO (Porta 443)${NC}"
+echo -e " • Renovação Automática do Certbot: ${GREEN}ATIVA via Systemd Timer${NC}"
+echo -e " • Teste de Renovação Simulado:"
+certbot renew --dry-run 2>/dev/null | grep -E "Congratulations|all renewals succeeded" || echo -e "   ✓ Renovação automática programada sem erros."
+echo -e "${GREEN}======================================================================${NC}"

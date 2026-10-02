@@ -124,6 +124,7 @@ bootstrap_environment() {
     ln -sf "${INSTALL_DIR}/scripts/install-idiario.sh" /usr/local/bin/idiario-install
     ln -sf "${INSTALL_DIR}/scripts/setup-idiario-class-diary.sh" /usr/local/bin/idiario-diario-unificado
     ln -sf "${INSTALL_DIR}/scripts/install-omr.sh" /usr/local/bin/omr-install
+    ln -sf "${INSTALL_DIR}/scripts/setup-domain-ssl.sh" /usr/local/bin/ieducar-ssl
 
     render_progress_bar 100 "Carregamento concluído com êxito!"
     echo ""
@@ -330,6 +331,12 @@ action_install_omr() {
     "${INSTALL_DIR}/scripts/install-omr.sh" || true
 }
 
+# Ação: Configurar Domínios & SSL HTTPS (i-Educar & i-Diário)
+action_setup_domain_ssl() {
+    echo ""
+    "${INSTALL_DIR}/scripts/setup-domain-ssl.sh" || true
+}
+
 # ==============================================================================
 # MENU PRINCIPAL INTERATIVO
 # ==============================================================================
@@ -353,6 +360,10 @@ case "${1:-}" in
         ;;
     --omr|--gabarito-omr|-omr)
         action_install_omr
+        exit 0
+        ;;
+    --ssl|--domain|-ssl)
+        action_setup_domain_ssl
         exit 0
         ;;
     --backup|-b)
@@ -402,13 +413,14 @@ while true; do
     echo -e "   ${GREEN}[8]${NC} 👤  Corrigir Foto de Perfil & Menu no i-Diário"
     echo -e "   ${GREEN}[9]${NC} 📑  Instalar Diário de Classe Escolar Unificado (i-Diário)"
     echo -e "   ${GREEN}[10]${NC} 🎯 Instalar Gabarito OMR & Elaborador de Provas (FastAPI, OpenCV)"
-    echo -e "   ${GREEN}[11]${NC} 🔄 Restaurar um Backup do MinIO (Assistente de Restauração)"
-    echo -e "   ${GREEN}[12]${NC} 📦 Executar Backup Manual Completo Agora"
+    echo -e "   ${GREEN}[11]${NC} 🔒 Configurar Domínios & SSL HTTPS (i-Educar & i-Diário)"
+    echo -e "   ${GREEN}[12]${NC} 🔄 Restaurar um Backup do MinIO (Assistente de Restauração)"
+    echo -e "   ${GREEN}[13]${NC} 📦 Executar Backup Manual Completo Agora"
     echo -e "   ${YELLOW}[0]${NC} 🚪  Sair"
     echo -e "${CYAN}======================================================================${NC}"
 
     CHOICE=""
-    read_input " Digite a opção desejada [0-12]: " "" CHOICE
+    read_input " Digite a opção desejada [0-13]: " "" CHOICE
 
     # Prevenção contra loop infinito em terminais não-interativos
     if [[ -z "$CHOICE" ]] && [ ! -e /dev/tty ]; then
@@ -448,9 +460,12 @@ while true; do
             action_install_omr
             ;;
         11)
-            action_restore
+            action_setup_domain_ssl
             ;;
         12)
+            action_restore
+            ;;
+        13)
             action_test_backup
             ;;
         0|sair|exit|q)
@@ -460,7 +475,7 @@ while true; do
             exit 0
             ;;
         *)
-            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 12.${NC}"
+            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 13.${NC}"
             ;;
     esac
 
