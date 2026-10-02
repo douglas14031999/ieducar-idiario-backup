@@ -363,6 +363,15 @@ NGINX_IEDUCAR
     chown -R www-data:www-data "${IEDUCAR_DIR}/storage" "${IEDUCAR_DIR}/bootstrap/cache" "${IEDUCAR_DIR}/public" "${IEDUCAR_DIR}/tmp" 2>/dev/null || true
     chmod -R 775 "${IEDUCAR_DIR}/storage" "${IEDUCAR_DIR}/bootstrap/cache" "${IEDUCAR_DIR}/tmp" 2>/dev/null || true
 
+    # Link de compatibilidade do JasperReports para carregamento de logos e brasões (/storage)
+    if [[ ! -d /storage || -L /storage ]]; then
+        ln -sfn "${IEDUCAR_DIR}/storage/app/public" /storage
+    fi
+    if [[ -d "${IEDUCAR_DIR}/storage/ieducar" && ! -e /storage/ieducar ]]; then
+        mkdir -p /storage
+        ln -sfn "${IEDUCAR_DIR}/storage/ieducar" /storage/ieducar
+    fi
+
     systemctl restart php*-fpm 2>/dev/null || true
     systemctl daemon-reload 2>/dev/null || true
     nginx -t && (systemctl restart nginx || systemctl start nginx)

@@ -308,6 +308,15 @@ if [[ -f "$JASPER_BIN" ]]; then
     echo -e "${GREEN}✓ Permissão executável garantida para JasperStarter.${NC}"
 fi
 
+# Link de compatibilidade do JasperReports para carregamento de logos e brasões (/storage)
+if [[ ! -d /storage || -L /storage ]]; then
+    ln -sfn "${IEDUCAR_DIR}/storage/app/public" /storage
+fi
+if [[ -d "${IEDUCAR_DIR}/storage/ieducar" && ! -e /storage/ieducar ]]; then
+    mkdir -p /storage
+    ln -sfn "${IEDUCAR_DIR}/storage/ieducar" /storage/ieducar
+fi
+
 echo -e "${YELLOW}[12/16] Instalando Módulo de Biblioteca...${NC}"
 if [[ ! -d "$IEDUCAR_DIR/packages/portabilis/i-educar-library-package" ]]; then
     git clone https://github.com/portabilis/i-educar-library-package.git "$IEDUCAR_DIR/packages/portabilis/i-educar-library-package"

@@ -212,9 +212,19 @@ php artisan cache:clear || true
 # Criar link simbólico do storage se necessário
 php artisan storage:link || true
 
-echo -e "${YELLOW}[6/6] Ajustando permissões de arquivos e reiniciando serviços...${NC}"
+echo -e "${YELLOW}[6/6] Ajustando permissões de arquivos e vinculando /storage para JasperReports...${NC}"
 chown -R www-data:www-data "${IEDUCAR_DIR}/storage" "${IEDUCAR_DIR}/bootstrap/cache" "${IEDUCAR_DIR}/public" "${IEDUCAR_DIR}/tmp" 2>/dev/null || true
 chmod -R 775 "${IEDUCAR_DIR}/storage" "${IEDUCAR_DIR}/bootstrap/cache" "${IEDUCAR_DIR}/tmp" 2>/dev/null || true
+
+# Vincular /storage na raiz para relatórios do JasperReports localizarem logos e brasões
+if [[ ! -d /storage || -L /storage ]]; then
+    ln -sfn "${IEDUCAR_DIR}/storage/app/public" /storage
+fi
+if [[ -d "${IEDUCAR_DIR}/storage/ieducar" && ! -e /storage/ieducar ]]; then
+    mkdir -p /storage
+    ln -sfn "${IEDUCAR_DIR}/storage/ieducar" /storage/ieducar
+fi
+echo -e "${GREEN}✓ Link /storage configurado para emissão de relatórios com imagens/logos${NC}"
 
 # Reiniciar PHP-FPM e Nginx
 systemctl daemon-reload 2>/dev/null || true
