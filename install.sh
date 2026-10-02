@@ -125,6 +125,7 @@ bootstrap_environment() {
     ln -sf "${INSTALL_DIR}/scripts/setup-idiario-class-diary.sh" /usr/local/bin/idiario-diario-unificado
     ln -sf "${INSTALL_DIR}/scripts/install-omr.sh" /usr/local/bin/omr-install
     ln -sf "${INSTALL_DIR}/scripts/setup-domain-ssl.sh" /usr/local/bin/ieducar-ssl
+    ln -sf "${INSTALL_DIR}/scripts/fix-ieducar-https.sh" /usr/local/bin/ieducar-fix-https
 
     render_progress_bar 100 "Carregamento concluído com êxito!"
     echo ""
@@ -364,6 +365,10 @@ case "${1:-}" in
         ;;
     --ssl|--domain|-ssl)
         action_setup_domain_ssl
+        exit 0
+        ;;
+    --fix-https|--fix-css|-fix)
+        "${INSTALL_DIR}/scripts/fix-ieducar-https.sh" || true
         exit 0
         ;;
     --backup|-b)

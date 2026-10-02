@@ -264,11 +264,20 @@ server {
         try_files \$uri \$uri/ /index.php?\$query_string;
     }
 
+    location ~* \.(jpg|jpeg|gif|png|css|js|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 30d;
+        access_log off;
+        try_files \$uri =404;
+    }
+
     location ~ \.php$ {
         include snippets/fastcgi-php.conf;
         fastcgi_pass unix:${php_sock};
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
         include fastcgi_params;
+        fastcgi_param HTTPS on;
+        fastcgi_param HTTP_X_FORWARDED_PROTO https;
+        fastcgi_param HTTP_X_FORWARDED_SSL on;
     }
 
     location ~ /\.ht {
@@ -289,15 +298,67 @@ NGINX_IEDUCAR
         certbot --nginx -d "${domain}" --agree-tos -m "${EMAIL_CONTACT}" --redirect || true
     fi
 
-    # Atualizar APP_URL no .env do i-Educar
-    if [[ -f "${IEDUCAR_DIR}/.env" ]]; then
-        sed -i "s|^APP_URL=.*|APP_URL=https://${domain}|" "${IEDUCAR_DIR}/.env"
-        echo -e "${GREEN}✓ .env atualizado com APP_URL=https://${domain}${NC}"
-        cd "${IEDUCAR_DIR}"
-        php artisan config:clear >/dev/null 2>&1 || true
-        php artisan route:clear >/dev/null 2>&1 || true
+    # Garantir parâmetros FastCGI HTTPS após a modificação do Certbot no vhost
+    if [[ -f /etc/nginx/sites-available/ieducar.conf ]]; then
+        if ! grep -q "fastcgi_param HTTPS" /etc/nginx/sites-available/ieducar.conf; then
+            sed -i '/include fastcgi_params;/a \        fastcgi_param HTTPS on;\n        fastcgi_param HTTP_X_FORWARDED_PROTO https;\n        fastcgi_param HTTP_X_FORWARDED_SSL on;' /etc/nginx/sites-available/ieducar.conf
+        fi
     fi
 
+    # Atualizar APP_URL e ASSET_URL no .env do i-Educar
+    if [[ -f "${IEDUCAR_DIR}/.env" ]]; then
+        sed -i "s|^APP_URL=.*|APP_URL=https://${domain}|" "${IEDUCAR_DIR}/.env"
+        if grep -q "^ASSET_URL=" "${IEDUCAR_DIR}/.env"; then
+            sed -i "s|^ASSET_URL=.*|ASSET_URL=https://${domain}|" "${IEDUCAR_DIR}/.env"
+        else
+            echo "ASSET_URL=https://${domain}" >> "${IEDUCAR_DIR}/.env"
+        fi
+        echo -e "${GREEN}✓ .env atualizado com APP_URL=https://${domain} e ASSET_URL=https://${domain}${NC}"
+    fi
+
+    # Forçar esquema HTTPS no Laravel para evitar Mixed Content (CSS/JS bloqueados pelo navegador)
+    local app_sp="${IEDUCAR_DIR}/app/Providers/AppServiceProvider.php"
+    if [[ -f "$app_sp" ]]; then
+        php -r '
+        $file = "'"${app_sp}"'";
+        $content = file_get_contents($file);
+        if (!str_contains($content, "forceScheme")) {
+            $content = preg_replace(
+                "/public function boot\(\)\s*\{/",
+                "public function boot()\n    {\n        \Illuminate\Support\Facades\URL::forceScheme(\"https\");",
+                $content
+            );
+            file_put_contents($file, $content);
+            echo "✓ AppServiceProvider atualizado com forceScheme(\"https\")\n";
+        }
+        '
+    fi
+
+    # Configurar TrustProxies para confiar no Nginx
+    local trust_px="${IEDUCAR_DIR}/app/Http/Middleware/TrustProxies.php"
+    if [[ -f "$trust_px" ]]; then
+        php -r '
+        $file = "'"${trust_px}"'";
+        $content = file_get_contents($file);
+        $content = preg_replace("/protected\s+\\$proxies\s*;/", "protected \$proxies = \"*\";", $content);
+        $content = preg_replace("/protected\s+\\$proxies\s*=\s*null\s*;/", "protected \$proxies = \"*\";", $content);
+        file_put_contents($file, $content);
+        '
+    fi
+
+    # Limpar TODOS os caches do Laravel para regerar tags de CSS/JS e Blade
+    cd "${IEDUCAR_DIR}"
+    php artisan view:clear >/dev/null 2>&1 || true
+    php artisan route:clear >/dev/null 2>&1 || true
+    php artisan config:clear >/dev/null 2>&1 || true
+    php artisan cache:clear >/dev/null 2>&1 || true
+    php artisan storage:link >/dev/null 2>&1 || true
+
+    # Permissões
+    chown -R www-data:www-data "${IEDUCAR_DIR}/storage" "${IEDUCAR_DIR}/bootstrap/cache" "${IEDUCAR_DIR}/public" "${IEDUCAR_DIR}/tmp" 2>/dev/null || true
+    chmod -R 775 "${IEDUCAR_DIR}/storage" "${IEDUCAR_DIR}/bootstrap/cache" "${IEDUCAR_DIR}/tmp" 2>/dev/null || true
+
+    systemctl restart php*-fpm 2>/dev/null || true
     systemctl reload nginx || systemctl restart nginx
     echo -e "${GREEN}✓ i-Educar configurado com sucesso em: https://${domain}${NC}"
 }
