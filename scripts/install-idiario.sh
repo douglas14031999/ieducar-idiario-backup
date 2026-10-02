@@ -58,7 +58,7 @@ echo -e " • Node.js + Yarn para compilação de assets"
 echo -e " • Clone do repositório oficial do i-Diário em: ${IDIARIO_DIR}"
 echo -e " • Banco de dados PostgreSQL '${DB_NAME}' e usuário '${DB_USER}'"
 echo -e " • Configuração de database.yml, secrets.yml (com shortcuts ativados)"
-echo -e " • Criação da Entidade, Usuário Admin (${ADMIN_PASS}) e Usuário API"
+echo -e " • Criação da Entidade e Usuário Administrador (${ADMIN_PASS})"
 echo -e " • Filas Sidekiq configuradas (critical, sync, exams, email)"
 echo -e " • Pré-compilação de assets de produção"
 echo -e " • Serviços no Systemd: idiario-web, idiario-sidekiq, idiario-sync"
@@ -288,7 +288,7 @@ echo -e "${YELLOW}[10/14] Executando migrações do banco de dados...${NC}"
 export RAILS_ENV=production
 bundle exec rails db:migrate RAILS_ENV=production || true
 
-echo -e "${YELLOW}[11/14] Configurando Entidade, Administrador e Usuário API...${NC}"
+echo -e "${YELLOW}[11/14] Configurando Entidade e Administrador...${NC}"
 SERVER_IP=$(curl -s -4 https://icanhazip.com 2>/dev/null || hostname -I | awk '{print $1}')
 
 # Setup da Entidade
@@ -296,25 +296,6 @@ bundle exec rails entity:setup NAME=idiario DOMAIN="${SERVER_IP}" DATABASE="${DB
 
 # Setup do Admin
 bundle exec rails entity:admin:create NAME=idiario ADMIN_PASSWORD="${ADMIN_PASS}" RAILS_ENV=production 2>/dev/null || true
-
-# Criação do Usuário API via Rails Runner
-cat << 'RUNNER' > /tmp/create_api_user.rb
-begin
-  u = User.find_or_initialize_by(email: "admin@idiario.local")
-  u.first_name = "Admin"
-  u.last_name = "Sistema"
-  u.password = "12345678"
-  u.password_confirmation = "12345678"
-  u.admin = true
-  u.save!
-  puts "✓ Usuário API admin@idiario.local configurado."
-rescue => e
-  puts "Aviso ao criar usuário API: #{e.message}"
-end
-RUNNER
-
-bundle exec rails runner /tmp/create_api_user.rb RAILS_ENV=production 2>/dev/null || true
-rm -f /tmp/create_api_user.rb
 
 echo -e "${YELLOW}[12/14] Aplicando correções nos relatórios e pré-compilando assets...${NC}"
 # Correção do erro de Logo nos Relatórios
@@ -414,7 +395,6 @@ echo -e "${GREEN}===============================================================
 echo -e " • URL de Acesso: ${CYAN}http://${SERVER_IP}:${WEB_PORT}${NC}"
 echo -e " • Usuário Administrador: ${CYAN}admin${NC}"
 echo -e " • Senha Administrador: ${CYAN}${ADMIN_PASS}${NC}"
-echo -e " • Usuário API Interna: ${CYAN}admin@idiario.local${NC} (Senha: 12345678)"
 echo -e " • Banco PostgreSQL: ${CYAN}${DB_NAME}${NC} (Usuário: ${DB_USER})"
 echo -e " • Diretório da Aplicação: ${CYAN}${IDIARIO_DIR}${NC}"
 echo -e " • Serviços Ativos e Monitorados pelo Systemd:"

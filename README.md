@@ -52,7 +52,7 @@ cd /opt/ieducar-backup && git pull origin main
 - 🧹 **Retenção Automática de 20 Dias:** Remove arquivos temporários e expurga backups antigos (> 20 dias) do MinIO e do disco local automaticamente.
 - 🔐 **Repositório 100% Seguro para GitHub Público:** Nenhuma senha ou segredo fica gravado no código. A configuração é gerada em `/etc/ieducar-backup/.env` com permissão estrita `chmod 600`.
 - 🚀 **Instalador Completo i-Educar + Todos os Módulos:** Instalação automatizada fim a fim do Core 2.10, PostgreSQL, Composer, Nginx, PHP 8.4, JasperStarter/Relatórios, Biblioteca, Educacenso, Transporte Escolar e Pré-Matrícula Digital (`ieducar-install`).
-- 📓 **Instalador Completo i-Diário (Rails):** Instalação automatizada do i-Diário com Ruby 2.6.6 compilado via rbenv + OpenSSL 1.1.1 dedicado, PostgreSQL, Redis, Sidekiq, serviços Systemd e usuário API (`idiario-install`).
+- 📓 **Instalador Completo i-Diário (Rails):** Instalação automatizada do i-Diário com Ruby 2.6.6 compilado via rbenv + OpenSSL 1.1.1 dedicado, PostgreSQL, Redis, Sidekiq e serviços Systemd (`idiario-install`).
 - 🔄 **Assistente de Restauração (Disaster Recovery):** Utilitário prático para baixar e restaurar bancos e arquivos do MinIO em caso de emergência (`ieducar-restore`).
 - 🎨 **Painel de Atalhos Rápidos (Opcional):** Transforma a tela inicial do i-Educar com 5 cards modernos de navegação direta (Alunos, Servidores, Relatórios por Turma, Boletim e Histórico Escolar). Perguntado na instalação ou ativável via comando `ieducar-dashboard`.
 - 🧬 **Povoamento Inicial do Banco (Opcional):** Conjunto de 24 seeders essenciais (Deficiências, Raças, Escolaridade Educacenso, Funções, Módulos, Regimes, Níveis de Ensino, Situações de Matrícula, etc.). Perguntado na instalação ou via comando `ieducar-seed`.
