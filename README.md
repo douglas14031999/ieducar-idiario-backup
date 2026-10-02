@@ -40,6 +40,7 @@ cd /opt/ieducar-backup && git pull origin main
 - 🧹 **Retenção Automática de 20 Dias:** Remove arquivos temporários e expurga backups antigos (> 20 dias) do MinIO e do disco local automaticamente.
 - 🔐 **Repositório 100% Seguro para GitHub Público:** Nenhuma senha ou segredo fica gravado no código. A configuração é gerada em `/etc/ieducar-backup/.env` com permissão estrita `chmod 600`.
 - 🔄 **Assistente de Restauração (Disaster Recovery):** Utilitário prático para baixar e restaurar bancos e arquivos do MinIO em caso de emergência (`ieducar-restore`).
+- 🎨 **Painel de Atalhos Rápidos (Opcional):** Transforma a tela inicial do i-Educar com 5 cards modernos de navegação direta (Alunos, Servidores, Relatórios por Turma, Boletim e Histórico Escolar). Perguntado na instalação ou ativável via comando `ieducar-dashboard`.
 - 🔔 **Notificações:** Suporte a webhooks de alerta no Discord e Telegram.
 
 ---
@@ -54,6 +55,7 @@ cd /opt/ieducar-backup && git pull origin main
 ├── scripts/
 │   ├── backup.sh               # Script principal executado pelo cron (dumps, sync e MinIO)
 │   ├── restore.sh              # Utilitário interativo de restauração
+│   ├── setup-dashboard.sh      # Configurador automático da tela de atalhos rápidos do i-Educar
 │   ├── install-minio.sh        # Instalador e configurador do MinIO Server 2025 e mc
 │   └── common.sh               # Funções de logging, checagem e notificações
 ├── .gitignore                  # Impede upload acidental de .env, logs e backups
@@ -113,6 +115,12 @@ tail -f /var/log/ieducar-backup.log
 ```bash
 systemctl status minio.service
 systemctl restart minio.service
+```
+
+### 5. Configurar Painel de Atalhos Rápidos (i-Educar)
+Caso não tenha instalado durante o setup inicial ou deseje reconfigurar a tela inicial com os 5 cards modernos:
+```bash
+ieducar-dashboard
 ```
 
 ---

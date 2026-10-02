@@ -159,6 +159,7 @@ echo -e "${GREEN}Agendamento configurado com sucesso em ${CRON_FILE}!${NC}"
 # Criar links simbólicos globais no sistema para facilitar comandos manuais
 ln -sf "${INSTALL_DIR}/scripts/backup.sh" /usr/local/bin/ieducar-backup
 ln -sf "${INSTALL_DIR}/scripts/restore.sh" /usr/local/bin/ieducar-restore
+ln -sf "${INSTALL_DIR}/scripts/setup-dashboard.sh" /usr/local/bin/ieducar-dashboard
 
 # 7. Resumo e Teste Opcional
 echo -e "${BLUE}[6/6] Instalação concluída com êxito!${NC}"
@@ -172,8 +173,9 @@ echo -e " • Horário de Backup:  ${YELLOW}Todos os dias às 23:59${NC}"
 echo -e " • Retenção no MinIO:  ${YELLOW}20 dias de histórico mantidos${NC}"
 echo ""
 echo -e " Comandos úteis disponíveis em qualquer lugar do terminal:"
-echo -e "   - Para rodar o backup agora:  ${GREEN}ieducar-backup${NC}"
-echo -e "   - Para restaurar um backup:   ${GREEN}ieducar-restore${NC}"
+echo -e "   - Para rodar o backup agora:        ${GREEN}ieducar-backup${NC}"
+echo -e "   - Para restaurar um backup:         ${GREEN}ieducar-restore${NC}"
+echo -e "   - Para configurar tela de atalhos:  ${GREEN}ieducar-dashboard${NC}"
 echo -e "${CYAN}======================================================================${NC}"
 
 # 8. Verificação e Criação Interativa de SWAP (Pós-Configuração)
@@ -221,7 +223,38 @@ else
     echo -e "${GREEN}• Memória SWAP já ativa no sistema (${SWAP_TOTAL}MB). Nenhuma alteração necessária.${NC}"
 fi
 
-# Perguntar se deseja testar agora
+# 9. Configuração Opcional dos Atalhos Rápidos no i-Educar
+echo ""
+echo -e "${CYAN}======================================================================${NC}"
+echo -e "${CYAN}        PAINEL DE ATALHOS RÁPIDOS DO I-EDUCAR (OPCIONAL)              ${NC}"
+echo -e "${CYAN}======================================================================${NC}"
+echo -e "Deseja substituir a tela inicial clássica do i-Educar por um painel"
+echo -e "moderno e limpo de atalhos rápidos com 5 cards diretos?"
+echo -e " • Cadastro de Alunos"
+echo -e " • Cadastro de Servidores"
+echo -e " • Relatório de Alunos por Turma"
+echo -e " • Boletim Escolar"
+echo -e " • Histórico Escolar"
+echo ""
+
+INSTALL_DASHBOARD="s"
+if [ -e /dev/tty ]; then
+    read -r -p "Deseja instalar a tela moderna de Atalhos Rápidos agora? (S/n): " INSTALL_DASHBOARD < /dev/tty || true
+fi
+INSTALL_DASHBOARD="${INSTALL_DASHBOARD:-s}"
+
+if [[ "$INSTALL_DASHBOARD" =~ ^[sSyY]$ || -z "$INSTALL_DASHBOARD" ]]; then
+    echo -e "${BLUE}Configurando tela de Atalhos Rápidos no i-Educar...${NC}"
+    if "${INSTALL_DIR}/scripts/setup-dashboard.sh"; then
+        echo -e "${GREEN}✓ Tela de Atalhos Rápidos configurada com sucesso!${NC}"
+    else
+        echo -e "${YELLOW}Não foi possível configurar os atalhos automáticos (i-Educar não localizado neste caminho). Mantido como está.${NC}"
+    fi
+else
+    echo -e "${YELLOW}Instalação de atalhos rápidos ignorada. Mantendo a tela padrão do i-Educar.${NC}"
+fi
+
+# 10. Perguntar se deseja testar agora
 RUN_TEST="n"
 if [ -e /dev/tty ]; then
     read -r -p "Deseja rodar o primeiro teste de backup agora? (s/N): " RUN_TEST < /dev/tty || true
