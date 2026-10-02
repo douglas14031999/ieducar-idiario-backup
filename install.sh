@@ -49,29 +49,6 @@ elif command -v yum &>/dev/null; then
     systemctl start crond >/dev/null 2>&1 || true
 fi
 
-# 2.1 Configuração Inteligente de SWAP (Otimização para Postgres & Rails)
-echo -e "${BLUE}Verificando configuração de memória SWAP...${NC}"
-SWAP_TOTAL=$(free -m | awk '/Swap:/ {print $2}')
-if [[ -z "$SWAP_TOTAL" || "$SWAP_TOTAL" -eq 0 ]]; then
-    echo -e "${YELLOW}Nenhum swap ativo detectado. Criando 4GB de SWAP para estabilidade...${NC}"
-    if [ ! -f /swapfile ]; then
-        fallocate -l 4G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=4096 status=none
-        chmod 600 /swapfile
-        mkswap /swapfile >/dev/null 2>&1
-    fi
-    swapon /swapfile 2>/dev/null || true
-    if ! grep -q "/swapfile" /etc/fstab; then
-        echo '/swapfile none swap sw 0 0' >> /etc/fstab
-    fi
-    sysctl -w vm.swappiness=10 >/dev/null 2>&1 || true
-    if ! grep -q "vm.swappiness" /etc/sysctl.conf; then
-        echo 'vm.swappiness=10' >> /etc/sysctl.conf
-    fi
-    echo -e "${GREEN}SWAP de 4GB criado e ativado com sucesso!${NC}"
-else
-    echo -e "${GREEN}SWAP já existente no sistema (${SWAP_TOTAL}MB). Nenhuma alteração necessária.${NC}"
-fi
-
 # 3. Preparar diretórios da aplicação
 echo -e "${BLUE}[2/6] Configurando diretório de instalação em ${INSTALL_DIR}...${NC}"
 mkdir -p "${CONFIG_DIR}"
@@ -182,7 +159,8 @@ ln -sf "${INSTALL_DIR}/scripts/restore.sh" /usr/local/bin/ieducar-restore
 echo -e "${BLUE}[6/6] Instalação concluída com êxito!${NC}"
 echo -e "${CYAN}======================================================================${NC}"
 echo -e " ${GREEN}Tudo pronto para os backups automáticos!${NC}"
-echo -e " • MinIO Web Console: ${YELLOW}http://$(curl -s https://api.ipify.org || echo "IP_VPS"):9000${NC}"
+echo -e " • MinIO API:          ${YELLOW}http://$(curl -s https://api.ipify.org || echo "IP_VPS"):9000${NC}"
+echo -e " • MinIO Web Console:  ${YELLOW}http://$(curl -s https://api.ipify.org || echo "IP_VPS"):9001${NC}"
 echo -e " • Configuração (.env): ${YELLOW}${ENV_FILE}${NC}"
 echo -e " • Logs de execução:   ${YELLOW}/var/log/ieducar-backup.log${NC}"
 echo -e " • Horário de Backup:  ${YELLOW}Todos os dias às 23:59${NC}"
@@ -192,6 +170,51 @@ echo -e " Comandos úteis disponíveis em qualquer lugar do terminal:"
 echo -e "   - Para rodar o backup agora:  ${GREEN}ieducar-backup${NC}"
 echo -e "   - Para restaurar um backup:   ${GREEN}ieducar-restore${NC}"
 echo -e "${CYAN}======================================================================${NC}"
+
+# 8. Verificação e Criação Interativa de SWAP (Pós-Configuração)
+SWAP_TOTAL=$(free -m | awk '/Swap:/ {print $2}')
+if [[ -z "$SWAP_TOTAL" || "$SWAP_TOTAL" -eq 0 ]]; then
+    echo ""
+    echo -e "${YELLOW}======================================================================${NC}"
+    echo -e "${YELLOW}       OTIMIZAÇÃO DE PERFORMANCE: NENHUM SWAP ATIVO DETECTADO         ${NC}"
+    echo -e "${YELLOW}======================================================================${NC}"
+    echo -e "O servidor não possui memória SWAP ativa. Aplicações pesadas como"
+    echo -e "PostgreSQL, i-Educar e i-Diário (Rails/Sidekiq) podem sofrer lentidão"
+    echo -e "ou congelamento por falta de memória RAM durante picos de uso."
+    echo ""
+    
+    CREATE_SWAP="s"
+    if [ -e /dev/tty ]; then
+        read -r -p "Deseja criar e ativar um arquivo SWAP de 4GB agora? (S/n): " CREATE_SWAP < /dev/tty || true
+    fi
+    CREATE_SWAP="${CREATE_SWAP:-s}"
+
+    if [[ "$CREATE_SWAP" =~ ^[sSyY]$ || -z "$CREATE_SWAP" ]]; then
+        echo -e "${BLUE}Criando e configurando 4GB de SWAP...${NC}"
+        if [ ! -f /swapfile ]; then
+            fallocate -l 4G /swapfile 2>/dev/null || dd if=/dev/zero of=/swapfile bs=1M count=4096 status=none
+            chmod 600 /swapfile
+            mkswap /swapfile >/dev/null 2>&1
+        fi
+        swapon /swapfile 2>/dev/null || true
+
+        # Persistir no fstab se ainda não configurado
+        if ! grep -q "/swapfile" /etc/fstab; then
+            echo '/swapfile none swap sw 0 0' >> /etc/fstab
+        fi
+
+        # Ajustar agressividade de swap do kernel
+        sysctl -w vm.swappiness=10 >/dev/null 2>&1 || true
+        if ! grep -q "vm.swappiness" /etc/sysctl.conf; then
+            echo 'vm.swappiness=10' >> /etc/sysctl.conf
+        fi
+        echo -e "${GREEN}SWAP de 4GB criado e ativado com sucesso!${NC}"
+    else
+        echo -e "${YELLOW}Criação de SWAP ignorada pelo usuário.${NC}"
+    fi
+else
+    echo -e "${GREEN}• Memória SWAP já ativa no sistema (${SWAP_TOTAL}MB). Nenhuma alteração necessária.${NC}"
+fi
 
 # Perguntar se deseja testar agora
 RUN_TEST="n"
