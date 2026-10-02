@@ -87,7 +87,7 @@ if [[ -f "$TRUST_PROXIES" ]]; then
     '
 fi
 
-echo -e "${YELLOW}[4/6] Otimizando Nginx e FastCGI HTTPS...${NC}"
+echo -e "${YELLOW}[4/6] Otimizando Nginx e rotas do i-Educar (Intranet / Laravel)...${NC}"
 PHP_SOCK="/run/php/php8.4-fpm.sock"
 if [[ ! -e "$PHP_SOCK" ]]; then
     FOUND_SOCK=$(find /run/php -type s -name "*.sock" 2>/dev/null | head -n 1 || true)
@@ -96,9 +96,27 @@ if [[ ! -e "$PHP_SOCK" ]]; then
     fi
 fi
 
-# Ajustar bloco de Nginx se existir
+# 4.1 Criar bridge para /intranet/index.php -> Laravel index.php (evita 404 pós-login)
+mkdir -p "${IEDUCAR_DIR}/public/intranet"
+cat << 'EOF' > "${IEDUCAR_DIR}/public/intranet/index.php"
+<?php
+require_once dirname(__DIR__) . '/index.php';
+EOF
+chown -R www-data:www-data "${IEDUCAR_DIR}/public/intranet"
+chmod 644 "${IEDUCAR_DIR}/public/intranet/index.php"
+echo -e "${GREEN}✓ Bridge '/intranet/index.php' criada com sucesso em public/intranet${NC}"
+
+# 4.2 Ajustar bloco de Nginx se existir
 for conf in /etc/nginx/sites-available/ieducar.conf /etc/nginx/conf.d/ieducar.conf; do
     if [[ -f "$conf" ]]; then
+        # Remover bloqueio 404 do snippets fastcgi que impede rotas .php do Laravel
+        sed -i 's|include snippets/fastcgi-php.conf;|fastcgi_split_path_info ^(.+\\.php)(/.+)$;\\n        try_files $uri /index.php?\\$query_string;|g' "$conf"
+
+        # Adicionar error_page 404 /index.php se não existir
+        if ! grep -q "error_page 404 /index.php;" "$conf"; then
+            sed -i '/location \/ {/i \    error_page 404 /index.php;\n' "$conf"
+        fi
+
         # Adicionar parâmetros de HTTPS no FastCGI se não existirem
         if ! grep -q "fastcgi_param HTTPS" "$conf"; then
             sed -i '/include fastcgi_params;/a \        fastcgi_param HTTPS on;\n        fastcgi_param HTTP_X_FORWARDED_PROTO https;\n        fastcgi_param HTTP_X_FORWARDED_SSL on;' "$conf"
