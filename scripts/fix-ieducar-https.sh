@@ -81,8 +81,7 @@ if [[ -f "$TRUST_PROXIES" ]]; then
     php -r '
     $file = "'"${TRUST_PROXIES}"'";
     $content = file_get_contents($file);
-    $content = preg_replace("/protected\s+\\$proxies\s*;/", "protected \$proxies = \"*\";", $content);
-    $content = preg_replace("/protected\s+\\$proxies\s*=\s*null\s*;/", "protected \$proxies = \"*\";", $content);
+    $content = preg_replace("/protected\s+\\\$proxies\s*(=[^;]+)?;/", "protected \$proxies = \"*\";", $content);
     file_put_contents($file, $content);
     echo "✓ TrustProxies configurado para confiar em todos os proxies (*)\n";
     '
@@ -129,6 +128,7 @@ chown -R www-data:www-data "${IEDUCAR_DIR}/storage" "${IEDUCAR_DIR}/bootstrap/ca
 chmod -R 775 "${IEDUCAR_DIR}/storage" "${IEDUCAR_DIR}/bootstrap/cache" "${IEDUCAR_DIR}/tmp" 2>/dev/null || true
 
 # Reiniciar PHP-FPM e Nginx
+systemctl daemon-reload 2>/dev/null || true
 systemctl restart php*-fpm 2>/dev/null || true
 nginx -t && systemctl reload nginx || systemctl restart nginx
 
