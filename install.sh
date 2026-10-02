@@ -49,6 +49,11 @@ elif command -v yum &>/dev/null; then
     systemctl start crond >/dev/null 2>&1 || true
 fi
 
+# 2.1 Garantir Fuso Horário de Brasília (America/Sao_Paulo)
+echo -e "${BLUE}Configurando fuso horário para America/Sao_Paulo (Horário de Brasília)...${NC}"
+timedatectl set-timezone America/Sao_Paulo >/dev/null 2>&1 || ln -sf /usr/share/zoneinfo/America/Sao_Paulo /etc/localtime
+systemctl restart cron >/dev/null 2>&1 || systemctl restart crond >/dev/null 2>&1 || true
+
 # 3. Preparar diretórios da aplicação
 echo -e "${BLUE}[2/6] Configurando diretório de instalação em ${INSTALL_DIR}...${NC}"
 mkdir -p "${CONFIG_DIR}"
