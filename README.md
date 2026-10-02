@@ -51,9 +51,12 @@ cd /opt/ieducar-backup && git pull origin main
 - ⏰ **Agendamento no Cron:** Configurado para rodar todos os dias às **23:59** sem interrupção dos serviços letivos.
 - 🧹 **Retenção Automática de 20 Dias:** Remove arquivos temporários e expurga backups antigos (> 20 dias) do MinIO e do disco local automaticamente.
 - 🔐 **Repositório 100% Seguro para GitHub Público:** Nenhuma senha ou segredo fica gravado no código. A configuração é gerada em `/etc/ieducar-backup/.env` com permissão estrita `chmod 600`.
+- 🚀 **Instalador Completo i-Educar + Todos os Módulos:** Instalação automatizada fim a fim do Core 2.10, PostgreSQL, Composer, Nginx, PHP 8.4, JasperStarter/Relatórios, Biblioteca, Educacenso, Transporte Escolar e Pré-Matrícula Digital (`ieducar-install`).
 - 🔄 **Assistente de Restauração (Disaster Recovery):** Utilitário prático para baixar e restaurar bancos e arquivos do MinIO em caso de emergência (`ieducar-restore`).
 - 🎨 **Painel de Atalhos Rápidos (Opcional):** Transforma a tela inicial do i-Educar com 5 cards modernos de navegação direta (Alunos, Servidores, Relatórios por Turma, Boletim e Histórico Escolar). Perguntado na instalação ou ativável via comando `ieducar-dashboard`.
 - 🧬 **Povoamento Inicial do Banco (Opcional):** Conjunto de 24 seeders essenciais (Deficiências, Raças, Escolaridade Educacenso, Funções, Módulos, Regimes, Níveis de Ensino, Situações de Matrícula, etc.). Perguntado na instalação ou via comando `ieducar-seed`.
+- 🗺️ **Migração PMD Leaflet (Opcional):** Migra a Pré-Matrícula Digital do Google Maps para Leaflet + OpenStreetMap sem custo de API (`ieducar-pmd`).
+- 👤 **Correção de Foto & Menu no i-Diário (Opcional):** Corrige o envio/corte de foto de perfil (Cropper JS), ImageMagick, rotas de upload e ativa atalhos no secrets.yml (`idiario-perfil`).
 - 🔔 **Notificações:** Suporte a webhooks de alerta no Discord e Telegram.
 
 ---
@@ -66,12 +69,14 @@ cd /opt/ieducar-backup && git pull origin main
 ├── config/
 │   └── backup.env.example      # Modelo completo de variáveis de ambiente
 ├── scripts/
+│   ├── install-ieducar.sh      # Instalador completo automatizado do i-Educar e todos os módulos
 │   ├── backup.sh               # Script principal executado pelo cron (dumps, sync e MinIO)
 │   ├── restore.sh              # Utilitário interativo de restauração
 │   ├── setup-dashboard.sh      # Configurador automático da tela de atalhos rápidos do i-Educar
 │   ├── seed-database.sh        # Povoamento inicial automatizado do banco de dados (24 seeders)
 │   ├── setup-swap.sh           # Configurador e otimizador de memória SWAP (4GB + swappiness)
 │   ├── setup-pmd-leaflet.sh    # Migração do Google Maps para Leaflet + OpenStreetMap (PMD)
+│   ├── setup-idiario-profile.sh # Correção de foto de perfil, cropper e menu no i-Diário
 │   ├── install-minio.sh        # Instalador e configurador do MinIO Server 2025 e mc
 │   └── common.sh               # Funções de logging, checagem e notificações
 ├── .gitignore                  # Impede upload acidental de .env, logs e backups
@@ -122,45 +127,57 @@ Para forçar a execução do backup a qualquer momento e acompanhar o log em tem
 ieducar-backup
 ```
 
-### 2. Restaurar um Backup do MinIO
+### 3. Restaurar um Backup do MinIO
 Para listar os backups disponíveis no MinIO e restaurar um banco de dados ou arquivos:
 ```bash
 ieducar-restore
 ```
 
-### 3. Verificar Logs
+### 4. Verificar Logs
 ```bash
 tail -f /var/log/ieducar-backup.log
 ```
 
-### 4. Gerenciar o Serviço MinIO
+### 5. Gerenciar o Serviço MinIO
 ```bash
 systemctl status minio.service
 systemctl restart minio.service
 ```
 
-### 5. Configurar Painel de Atalhos Rápidos (i-Educar)
+### 6. Configurar Painel de Atalhos Rápidos (i-Educar)
 Caso não tenha instalado durante o setup inicial ou deseje reconfigurar a tela inicial com os 5 cards modernos:
 ```bash
 ieducar-dashboard
 ```
 
-### 6. Executar Povoamento Inicial do Banco (Seeders)
+### 7. Executar Povoamento Inicial do Banco (Seeders)
 Para popular ou atualizar tabelas e registros essenciais do Educacenso e do i-Educar:
 ```bash
 ieducar-seed
 ```
 
-### 7. Configurar / Otimizar Memória SWAP
+### 8. Configurar / Otimizar Memória SWAP
 Para criar ou redefinir 4GB de SWAP com `vm.swappiness=10`:
 ```bash
 ieducar-swap
 ```
 
-### 8. Migrar PMD para Leaflet / OpenStreetMap
+### 9. Migrar PMD para Leaflet / OpenStreetMap
 Para migrar o módulo de Pré-Matrícula Digital (se instalado) para mapas livres sem API Key do Google:
 ```bash
 ieducar-pmd
+```
+
+### 10. Corrigir Foto de Perfil & Menu no i-Diário
+Para corrigir envio de fotos de perfil, dependências do ImageMagick, rotas de upload e ativar atalhos no secrets.yml:
+```bash
+idiario-perfil
+```
+
+### 11. Instalar i-Educar Completo + Todos os Módulos
+Para rodar a instalação do zero do Core do i-Educar com Relatórios, Biblioteca, Educacenso, Transporte e Pré-Matrícula Digital:
+```bash
+ieducar-install
 ```
 
 ---
