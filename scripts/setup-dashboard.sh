@@ -18,37 +18,150 @@ NC='\033[0m'
 
 echo -e "${BLUE}=== Configurando Painel de Atalhos Rápidos do i-Educar ===${NC}"
 
-# 1. Localizar o diretório do i-Educar
-IEDUCAR_DIR=""
-for dir in /var/www/ieducar /var/www/i-educar /var/www/html/ieducar; do
-    if [[ -d "$dir/ieducar/intranet" ]]; then
-        IEDUCAR_DIR="$dir"
-        break
+# 1. Localização 100% Automática do Diretório do i-Educar
+detect_ieducar_dir() {
+    # Estratégia A: Variável IEDUCAR_STORAGE_PATH no /etc/ieducar-backup/.env se existir
+    if [[ -f /etc/ieducar-backup/.env ]]; then
+        local env_storage
+        env_storage=$(grep -E "^IEDUCAR_STORAGE_PATH=" /etc/ieducar-backup/.env 2>/dev/null | cut -d'=' -f2 | tr -d '"' | tr -d "'" || true)
+        if [[ -n "$env_storage" && -d "$env_storage" ]]; then
+            local cand
+            cand=$(dirname "$env_storage")
+            if [[ -d "$cand/ieducar/intranet" || -d "$cand/intranet" || -f "$cand/artisan" ]]; then
+                echo "$cand"
+                return 0
+            fi
+        fi
     fi
-done
 
-if [[ -z "$IEDUCAR_DIR" ]]; then
-    echo -e "${RED}[ERRO] Diretório do i-Educar não encontrado automaticamente.${NC}"
-    echo "Verifique se a aplicação está instalada em /var/www/ieducar."
+    # Estratégia B: Caminhos padrão mais comuns em servidores Linux
+    local common_paths=(
+        "/var/www/ieducar"
+        "/var/www/i-educar"
+        "/var/www/html/ieducar"
+        "/var/www/html/i-educar"
+        "/var/www/html"
+        "/srv/ieducar"
+        "/opt/ieducar"
+    )
+    for p in "${common_paths[@]}"; do
+        if [[ -d "$p/ieducar/intranet" || ( -d "$p/intranet" && -f "$p/artisan" ) ]]; then
+            echo "$p"
+            return 0
+        fi
+    done
+
+    # Estratégia C: Detectar nas configurações do Nginx (/etc/nginx)
+    if [[ -d /etc/nginx ]]; then
+        local ngx_roots
+        ngx_roots=$(grep -rhE "^\s*root\s+.*ieducar" /etc/nginx/ 2>/dev/null | awk '{print $2}' | tr -d ';' || true)
+        for ngx_p in $ngx_roots; do
+            local cand="$ngx_p"
+            while [[ "$cand" != "/" && -n "$cand" ]]; do
+                if [[ -d "$cand/ieducar/intranet" || ( -d "$cand/intranet" && -f "$cand/artisan" ) ]]; then
+                    echo "$cand"
+                    return 0
+                fi
+                cand=$(dirname "$cand")
+            done
+        done
+    fi
+
+    # Estratégia D: Detectar nas configurações do Apache (/etc/apache2 ou /etc/httpd)
+    if [[ -d /etc/apache2 || -d /etc/httpd ]]; then
+        local ap_roots
+        ap_roots=$(grep -rhE "^\s*DocumentRoot\s+.*ieducar" /etc/apache2/ /etc/httpd/ 2>/dev/null | awk '{print $2}' | tr -d '"' || true)
+        for ap_p in $ap_roots; do
+            local cand="$ap_p"
+            while [[ "$cand" != "/" && -n "$cand" ]]; do
+                if [[ -d "$cand/ieducar/intranet" || ( -d "$cand/intranet" && -f "$cand/artisan" ) ]]; then
+                    echo "$cand"
+                    return 0
+                fi
+                cand=$(dirname "$cand")
+            done
+        done
+    fi
+
+    # Estratégia E: Busca rápida nos diretórios de aplicações (/var/www, /srv, /opt, /home, /root)
+    local fast_file
+    fast_file=$(find /var/www /srv /opt /home /root -maxdepth 5 -type f -name "educar_index.php" 2>/dev/null | head -n 1 || true)
+    if [[ -n "$fast_file" ]]; then
+        local d1 d2 d3
+        d1=$(dirname "$fast_file") # .../intranet
+        d2=$(dirname "$d1")        # .../ieducar
+        d3=$(dirname "$d2")        # ex: /var/www/ieducar
+        if [[ -f "$d3/artisan" || -d "$d3/routes" ]]; then
+            echo "$d3"
+            return 0
+        elif [[ -f "$d2/artisan" || -d "$d2/routes" ]]; then
+            echo "$d2"
+            return 0
+        else
+            echo "$d2"
+            return 0
+        fi
+    fi
+
+    # Estratégia F: Busca profunda global no sistema de arquivos
+    local deep_file
+    deep_file=$(find / -path "/proc" -prune -o -path "/sys" -prune -o -path "/dev" -prune -o -path "/run" -prune -o -path "/tmp" -prune -o -type f -name "educar_index.php" -print 2>/dev/null | head -n 1 || true)
+    if [[ -n "$deep_file" ]]; then
+        local d1 d2 d3
+        d1=$(dirname "$deep_file")
+        d2=$(dirname "$d1")
+        d3=$(dirname "$d2")
+        if [[ -f "$d3/artisan" || -d "$d3/routes" ]]; then
+            echo "$d3"
+            return 0
+        else
+            echo "$d2"
+            return 0
+        fi
+    fi
+
+    return 1
+}
+
+echo -e "${BLUE}Localizando instalação do i-Educar automaticamente no servidor...${NC}"
+IEDUCAR_DIR=$(detect_ieducar_dir || true)
+
+if [[ -z "$IEDUCAR_DIR" || ! -d "$IEDUCAR_DIR" ]]; then
+    echo -e "${RED}[ERRO] Instalação do i-Educar não foi localizada automaticamente.${NC}"
+    echo "Certifique-se de que o i-Educar está presente neste servidor."
     exit 1
 fi
 
-echo -e "${GREEN}i-Educar localizado em: ${IEDUCAR_DIR}${NC}"
+echo -e "${GREEN}✓ i-Educar localizado com sucesso em: ${IEDUCAR_DIR}${NC}"
 
-# Detectar proprietário web
-WEB_USER="www-data"
-if ! id -u "$WEB_USER" &>/dev/null; then
+# Definir a pasta intranet exata
+if [[ -d "${IEDUCAR_DIR}/ieducar/intranet" ]]; then
+    INTRANET_DIR="${IEDUCAR_DIR}/ieducar/intranet"
+elif [[ -d "${IEDUCAR_DIR}/intranet" ]]; then
+    INTRANET_DIR="${IEDUCAR_DIR}/intranet"
+else
+    echo -e "${RED}[ERRO] Diretório intranet não encontrado em ${IEDUCAR_DIR}.${NC}"
+    exit 1
+fi
+echo -e "${GREEN}✓ Pasta intranet identificada em: ${INTRANET_DIR}${NC}"
+
+# Detectar proprietário e grupo web automaticamente a partir das permissões da pasta
+WEB_USER=$(stat -c '%U' "$INTRANET_DIR" 2>/dev/null || echo "www-data")
+WEB_GROUP=$(stat -c '%G' "$INTRANET_DIR" 2>/dev/null || echo "$WEB_USER")
+
+if [[ "$WEB_USER" == "root" ]] && id -u "www-data" &>/dev/null; then
+    WEB_USER="www-data"
+    WEB_GROUP="www-data"
+elif [[ "$WEB_USER" == "root" ]] && id -u "nginx" &>/dev/null; then
     WEB_USER="nginx"
-    if ! id -u "$WEB_USER" &>/dev/null; then
-        WEB_USER="root"
-    fi
+    WEB_GROUP="nginx"
 fi
 
-# 2. Configurar a página /intranet/index.php com os Atalhos Rápidos
-echo -e "${BLUE}Configurando /intranet/index.php...${NC}"
-cp -n "${IEDUCAR_DIR}/ieducar/intranet/index.php" "${IEDUCAR_DIR}/ieducar/intranet/index.php.bkp" 2>/dev/null || true
+# 2. Configurar a página index.php com os Atalhos Rápidos
+echo -e "${BLUE}Configurando ${INTRANET_DIR}/index.php...${NC}"
+cp -n "${INTRANET_DIR}/index.php" "${INTRANET_DIR}/index.php.bkp" 2>/dev/null || true
 
-cat <<'EOF' > "${IEDUCAR_DIR}/ieducar/intranet/index.php"
+cat <<'EOF' > "${INTRANET_DIR}/index.php"
 <?php
 
 use Illuminate\Support\Facades\Auth;
@@ -253,8 +366,9 @@ return new class {
 EOF
 
 # 3. Limpar o educar_index.php de resquícios de calendário
-echo -e "${BLUE}Limpando educar_index.php...${NC}"
-cat <<'EOF' > "${IEDUCAR_DIR}/ieducar/intranet/educar_index.php"
+echo -e "${BLUE}Limpando ${INTRANET_DIR}/educar_index.php...${NC}"
+cp -n "${INTRANET_DIR}/educar_index.php" "${INTRANET_DIR}/educar_index.php.bkp" 2>/dev/null || true
+cat <<'EOF' > "${INTRANET_DIR}/educar_index.php"
 <?php
 
 use Illuminate\Support\Facades\Auth;
@@ -275,10 +389,11 @@ EOF
 
 # 4. Ajustar rotas do Laravel (routes/web.php e WebController.php) para manter fixo no index.php
 echo -e "${BLUE}Ajustando rotas de redirecionamento no Laravel...${NC}"
-if [[ -f "${IEDUCAR_DIR}/routes/web.php" ]]; then
-    cp -n "${IEDUCAR_DIR}/routes/web.php" "${IEDUCAR_DIR}/routes/web.php.bkp" 2>/dev/null || true
+ROUTES_FILE="${IEDUCAR_DIR}/routes/web.php"
+if [[ -f "$ROUTES_FILE" ]]; then
+    cp -n "$ROUTES_FILE" "${ROUTES_FILE}.bkp" 2>/dev/null || true
     php -r "
-    \$file = '${IEDUCAR_DIR}/routes/web.php';
+    \$file = '${ROUTES_FILE}';
     \$content = file_get_contents(\$file);
     \$content = preg_replace('/Route::redirect\(\x27intranet\/index\.php\x27,\s*\x27\/web\x27\)\s*->name\(\x27home\x27\);/m', '// redirect desativado', \$content);
     \$content = str_replace(\"Route::redirect('/', '/web');\", \"Route::redirect('/', '/intranet/index.php')->name('home');\", \$content);
@@ -286,13 +401,14 @@ if [[ -f "${IEDUCAR_DIR}/routes/web.php" ]]; then
     " 2>/dev/null || true
 fi
 
-if [[ -f "${IEDUCAR_DIR}/app/Http/Controllers/WebController.php" ]]; then
-    cp -n "${IEDUCAR_DIR}/app/Http/Controllers/WebController.php" "${IEDUCAR_DIR}/app/Http/Controllers/WebController.php.bkp" 2>/dev/null || true
-    sed -i "s|redirect('intranet/educar_index.php')|redirect('intranet/index.php')|g" "${IEDUCAR_DIR}/app/Http/Controllers/WebController.php" || true
+WEB_CONTROLLER="${IEDUCAR_DIR}/app/Http/Controllers/WebController.php"
+if [[ -f "$WEB_CONTROLLER" ]]; then
+    cp -n "$WEB_CONTROLLER" "${WEB_CONTROLLER}.bkp" 2>/dev/null || true
+    sed -i "s|redirect('intranet/educar_index.php')|redirect('intranet/index.php')|g" "$WEB_CONTROLLER" || true
 fi
 
 # 5. Ajustar permissões
-chown -R "${WEB_USER}:${WEB_USER}" "${IEDUCAR_DIR}/ieducar/intranet/index.php" "${IEDUCAR_DIR}/ieducar/intranet/educar_index.php" 2>/dev/null || true
+chown -R "${WEB_USER}:${WEB_GROUP}" "${INTRANET_DIR}/index.php" "${INTRANET_DIR}/educar_index.php" 2>/dev/null || true
 
 # 6. Limpar caches do Laravel
 echo -e "${BLUE}Limpando caches do Laravel...${NC}"
@@ -301,5 +417,8 @@ if command -v php &>/dev/null && [[ -f "${IEDUCAR_DIR}/artisan" ]]; then
     php "${IEDUCAR_DIR}/artisan" config:clear >/dev/null 2>&1 || true
     php "${IEDUCAR_DIR}/artisan" cache:clear >/dev/null 2>&1 || true
 fi
+
+# 7. Recarregar servidor web se ativo
+systemctl reload nginx >/dev/null 2>&1 || systemctl reload apache2 >/dev/null 2>&1 || systemctl reload httpd >/dev/null 2>&1 || true
 
 echo -e "${GREEN}✓ Painel de Atalhos Rápidos configurado com sucesso!${NC}"
