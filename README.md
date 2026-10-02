@@ -17,8 +17,9 @@ Ao executar, o script abre uma **Central Interativa** no terminal, permitindo es
 - `[2]` 🧬 **Popular Banco de Dados** (24 Seeders essenciais do Educacenso)
 - `[3]` 🎨 **Configurar Tela de Atalhos Rápidos** (Dashboard moderno no i-Educar)
 - `[4]` ⚡ **Configurar / Otimizar Memória SWAP** (4GB + swappiness=10)
-- `[5]` 🔄 **Restaurar um Backup do MinIO** (Assistente de Restauração)
-- `[6]` 📦 **Executar Backup Manual Completo Agora**
+- `[5]` 🗺️ **Migrar PMD para Leaflet/OpenStreetMap** (Pré-Matrícula Digital)
+- `[6]` 🔄 **Restaurar um Backup do MinIO** (Assistente de Restauração)
+- `[7]` 📦 **Executar Backup Manual Completo Agora**
 - `[0]` 🚪 **Sair**
 
 > 💡 *Após cada ação concluída, o script retorna automaticamente à tela inicial para que você possa efetuar outras operações sem precisar reiniciá-lo.*
@@ -70,6 +71,7 @@ cd /opt/ieducar-backup && git pull origin main
 │   ├── setup-dashboard.sh      # Configurador automático da tela de atalhos rápidos do i-Educar
 │   ├── seed-database.sh        # Povoamento inicial automatizado do banco de dados (24 seeders)
 │   ├── setup-swap.sh           # Configurador e otimizador de memória SWAP (4GB + swappiness)
+│   ├── setup-pmd-leaflet.sh    # Migração do Google Maps para Leaflet + OpenStreetMap (PMD)
 │   ├── install-minio.sh        # Instalador e configurador do MinIO Server 2025 e mc
 │   └── common.sh               # Funções de logging, checagem e notificações
 ├── .gitignore                  # Impede upload acidental de .env, logs e backups
@@ -153,6 +155,12 @@ ieducar-seed
 Para criar ou redefinir 4GB de SWAP com `vm.swappiness=10`:
 ```bash
 ieducar-swap
+```
+
+### 8. Migrar PMD para Leaflet / OpenStreetMap
+Para migrar o módulo de Pré-Matrícula Digital (se instalado) para mapas livres sem API Key do Google:
+```bash
+ieducar-pmd
 ```
 
 ---

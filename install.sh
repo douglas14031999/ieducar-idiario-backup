@@ -118,6 +118,7 @@ bootstrap_environment() {
     ln -sf "${INSTALL_DIR}/scripts/setup-dashboard.sh" /usr/local/bin/ieducar-dashboard
     ln -sf "${INSTALL_DIR}/scripts/seed-database.sh" /usr/local/bin/ieducar-seed
     ln -sf "${INSTALL_DIR}/scripts/setup-swap.sh" /usr/local/bin/ieducar-swap
+    ln -sf "${INSTALL_DIR}/scripts/setup-pmd-leaflet.sh" /usr/local/bin/ieducar-pmd
 
     render_progress_bar 100 "Carregamento concluído com êxito!"
     echo ""
@@ -270,7 +271,13 @@ action_configure_swap() {
     "${INSTALL_DIR}/scripts/setup-swap.sh" || true
 }
 
-# Ação 5: Restaurar um Backup existente
+# Ação 5: Migrar Pré-Matrícula Digital (PMD) para Leaflet / OpenStreetMap
+action_setup_pmd() {
+    echo ""
+    "${INSTALL_DIR}/scripts/setup-pmd-leaflet.sh" || true
+}
+
+# Ação 6: Restaurar um Backup existente
 action_restore() {
     echo ""
     echo -e "${CYAN}======================================================================${NC}"
@@ -279,7 +286,7 @@ action_restore() {
     "${INSTALL_DIR}/scripts/restore.sh" || true
 }
 
-# Ação 6: Executar Backup Manual Imediato
+# Ação 7: Executar Backup Manual Imediato
 action_test_backup() {
     echo ""
     echo -e "${CYAN}======================================================================${NC}"
@@ -313,6 +320,10 @@ case "${1:-}" in
         action_configure_swap
         exit 0
         ;;
+    --pmd|-p)
+        action_setup_pmd
+        exit 0
+        ;;
     --restore|-r)
         action_restore
         exit 0
@@ -330,13 +341,14 @@ while true; do
     echo -e "   ${GREEN}[2]${NC} 🧬  Popular Banco de Dados do i-Educar (24 Seeders Iniciais Educacenso)"
     echo -e "   ${GREEN}[3]${NC} 🎨  Configurar Tela de Atalhos Rápidos (Dashboard Inicial do i-Educar)"
     echo -e "   ${GREEN}[4]${NC} ⚡  Configurar / Otimizar Memória SWAP (4GB + swappiness=10)"
-    echo -e "   ${GREEN}[5]${NC} 🔄  Restaurar um Backup do MinIO (Assistente de Restauração)"
-    echo -e "   ${GREEN}[6]${NC} 📦  Executar Backup Manual Completo Agora"
+    echo -e "   ${GREEN}[5]${NC} 🗺️  Migrar PMD para Leaflet/OpenStreetMap (Pré-Matrícula Digital)"
+    echo -e "   ${GREEN}[6]${NC} 🔄  Restaurar um Backup do MinIO (Assistente de Restauração)"
+    echo -e "   ${GREEN}[7]${NC} 📦  Executar Backup Manual Completo Agora"
     echo -e "   ${YELLOW}[0]${NC} 🚪  Sair"
     echo -e "${CYAN}======================================================================${NC}"
 
     CHOICE=""
-    read_input " Digite a opção desejada [0-6]: " "" CHOICE
+    read_input " Digite a opção desejada [0-7]: " "" CHOICE
 
     # Prevenção contra loop infinito em terminais não-interativos
     if [[ -z "$CHOICE" ]] && [ ! -e /dev/tty ]; then
@@ -358,9 +370,12 @@ while true; do
             action_configure_swap
             ;;
         5)
-            action_restore
+            action_setup_pmd
             ;;
         6)
+            action_restore
+            ;;
+        7)
             action_test_backup
             ;;
         0|sair|exit|q)
@@ -370,7 +385,7 @@ while true; do
             exit 0
             ;;
         *)
-            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 6.${NC}"
+            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 7.${NC}"
             ;;
     esac
 
