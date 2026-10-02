@@ -41,6 +41,7 @@ cd /opt/ieducar-backup && git pull origin main
 - 🔐 **Repositório 100% Seguro para GitHub Público:** Nenhuma senha ou segredo fica gravado no código. A configuração é gerada em `/etc/ieducar-backup/.env` com permissão estrita `chmod 600`.
 - 🔄 **Assistente de Restauração (Disaster Recovery):** Utilitário prático para baixar e restaurar bancos e arquivos do MinIO em caso de emergência (`ieducar-restore`).
 - 🎨 **Painel de Atalhos Rápidos (Opcional):** Transforma a tela inicial do i-Educar com 5 cards modernos de navegação direta (Alunos, Servidores, Relatórios por Turma, Boletim e Histórico Escolar). Perguntado na instalação ou ativável via comando `ieducar-dashboard`.
+- 🧬 **Povoamento Inicial do Banco (Opcional):** Conjunto de 24 seeders essenciais (Deficiências, Raças, Escolaridade Educacenso, Funções, Módulos, Regimes, Níveis de Ensino, Situações de Matrícula, etc.). Perguntado na instalação ou via comando `ieducar-seed`.
 - 🔔 **Notificações:** Suporte a webhooks de alerta no Discord e Telegram.
 
 ---
@@ -56,6 +57,7 @@ cd /opt/ieducar-backup && git pull origin main
 │   ├── backup.sh               # Script principal executado pelo cron (dumps, sync e MinIO)
 │   ├── restore.sh              # Utilitário interativo de restauração
 │   ├── setup-dashboard.sh      # Configurador automático da tela de atalhos rápidos do i-Educar
+│   ├── seed-database.sh        # Povoamento inicial automatizado do banco de dados (24 seeders)
 │   ├── install-minio.sh        # Instalador e configurador do MinIO Server 2025 e mc
 │   └── common.sh               # Funções de logging, checagem e notificações
 ├── .gitignore                  # Impede upload acidental de .env, logs e backups
@@ -121,6 +123,12 @@ systemctl restart minio.service
 Caso não tenha instalado durante o setup inicial ou deseje reconfigurar a tela inicial com os 5 cards modernos:
 ```bash
 ieducar-dashboard
+```
+
+### 6. Executar Povoamento Inicial do Banco (Seeders)
+Para popular ou atualizar tabelas e registros essenciais do Educacenso e do i-Educar:
+```bash
+ieducar-seed
 ```
 
 ---

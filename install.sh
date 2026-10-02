@@ -160,6 +160,7 @@ echo -e "${GREEN}Agendamento configurado com sucesso em ${CRON_FILE}!${NC}"
 ln -sf "${INSTALL_DIR}/scripts/backup.sh" /usr/local/bin/ieducar-backup
 ln -sf "${INSTALL_DIR}/scripts/restore.sh" /usr/local/bin/ieducar-restore
 ln -sf "${INSTALL_DIR}/scripts/setup-dashboard.sh" /usr/local/bin/ieducar-dashboard
+ln -sf "${INSTALL_DIR}/scripts/seed-database.sh" /usr/local/bin/ieducar-seed
 
 # 7. Resumo e Teste Opcional
 echo -e "${BLUE}[6/6] Instalação concluída com êxito!${NC}"
@@ -176,6 +177,7 @@ echo -e " Comandos úteis disponíveis em qualquer lugar do terminal:"
 echo -e "   - Para rodar o backup agora:        ${GREEN}ieducar-backup${NC}"
 echo -e "   - Para restaurar um backup:         ${GREEN}ieducar-restore${NC}"
 echo -e "   - Para configurar tela de atalhos:  ${GREEN}ieducar-dashboard${NC}"
+echo -e "   - Para popular dados do i-Educar:   ${GREEN}ieducar-seed${NC}"
 echo -e "${CYAN}======================================================================${NC}"
 
 # 8. Verificação e Criação Interativa de SWAP (Pós-Configuração)
@@ -254,7 +256,40 @@ else
     echo -e "${YELLOW}Instalação de atalhos rápidos ignorada. Mantendo a tela padrão do i-Educar.${NC}"
 fi
 
-# 10. Perguntar se deseja testar agora
+# 10. Configuração e Povoamento Inicial do Banco de Dados (Seeders Opcionais)
+echo ""
+echo -e "${CYAN}======================================================================${NC}"
+echo -e "${CYAN}      POVOAMENTO INICIAL DO BANCO DE DADOS I-EDUCAR (OPCIONAL)        ${NC}"
+echo -e "${CYAN}======================================================================${NC}"
+echo -e "Deseja realizar o povoamento inicial automático do banco de dados?"
+echo -e "Isso popula tabelas padrão essenciais para o funcionamento do i-Educar:"
+echo -e " • Tipos de deficiências e transtornos (Educacenso)"
+echo -e " • Graus de escolaridade e raças (Educacenso)"
+echo -e " • Disciplinas de graduação e critérios de acesso à gestão"
+echo -e " • Tipos de abandono, motivos de transferência e dispensas"
+echo -e " • Funções de servidores (Professores, Diretor, Coordenador, etc.)"
+echo -e " • Módulos (Bimestre, Trimestre, Semestre, Ano) e Níveis de ensino"
+echo -e " • Tipos de turmas, regimes, vínculos, projetos e situações de matrícula"
+echo ""
+
+RUN_SEED="s"
+if [ -e /dev/tty ]; then
+    read -r -p "Deseja popular os dados padrão no banco agora? (S/n): " RUN_SEED < /dev/tty || true
+fi
+RUN_SEED="${RUN_SEED:-s}"
+
+if [[ "$RUN_SEED" =~ ^[sSyY]$ || -z "$RUN_SEED" ]]; then
+    echo -e "${BLUE}Executando povoamento inicial do banco do i-Educar...${NC}"
+    if "${INSTALL_DIR}/scripts/seed-database.sh"; then
+        echo -e "${GREEN}✓ Banco de dados populado com sucesso!${NC}"
+    else
+        echo -e "${YELLOW}Aviso: Não foi possível completar o seed automático neste momento. Execute 'ieducar-seed' para tentar novamente.${NC}"
+    fi
+else
+    echo -e "${YELLOW}Povoamento inicial do banco ignorado. Mantendo o banco como está.${NC}"
+fi
+
+# 11. Perguntar se deseja testar agora
 RUN_TEST="n"
 if [ -e /dev/tty ]; then
     read -r -p "Deseja rodar o primeiro teste de backup agora? (s/N): " RUN_TEST < /dev/tty || true
