@@ -58,6 +58,7 @@ cd /opt/ieducar-backup && git pull origin main
 - 🧬 **Povoamento Inicial do Banco (Opcional):** Conjunto de 24 seeders essenciais (Deficiências, Raças, Escolaridade Educacenso, Funções, Módulos, Regimes, Níveis de Ensino, Situações de Matrícula, etc.). Perguntado na instalação ou via comando `ieducar-seed`.
 - 🗺️ **Migração PMD Leaflet (Opcional):** Migra a Pré-Matrícula Digital do Google Maps para Leaflet + OpenStreetMap sem custo de API (`ieducar-pmd`).
 - 👤 **Correção de Foto & Menu no i-Diário (Opcional):** Corrige o envio/corte de foto de perfil (Cropper JS), ImageMagick, rotas de upload e ativa atalhos no secrets.yml (`idiario-perfil`).
+- 📑 **Diário de Classe Escolar Unificado (i-Diário):** Emite em um único PDF mesclado a Capa Oficial, Frequência, Notas, Avaliações Descritivas/Pareceres, Conteúdos, Observações e 2ª assinatura (`idiario-diario-unificado`).
 - 🔔 **Notificações:** Suporte a webhooks de alerta no Discord e Telegram.
 
 ---
@@ -72,6 +73,7 @@ cd /opt/ieducar-backup && git pull origin main
 ├── scripts/
 │   ├── install-ieducar.sh      # Instalador completo automatizado do i-Educar e todos os módulos
 │   ├── install-idiario.sh      # Instalador completo automatizado do i-Diário (Rails/Ruby 2.6)
+│   ├── setup-idiario-class-diary.sh # Diário de Classe Escolar Unificado para o i-Diário
 │   ├── backup.sh               # Script principal executado pelo cron (dumps, sync e MinIO)
 │   ├── restore.sh              # Utilitário interativo de restauração
 │   ├── setup-dashboard.sh      # Configurador automático da tela de atalhos rápidos do i-Educar
@@ -186,6 +188,12 @@ ieducar-install
 Para instalar do zero o i-Diário com Ruby 2.6.6 compilado, PostgreSQL, Redis, Sidekiq e serviços no systemd:
 ```bash
 idiario-install
+```
+
+### 13. Instalar Diário de Classe Escolar Unificado (i-Diário)
+Para instalar o módulo de Diário de Classe Unificado com Capa Oficial, mesclagem de PDFs (qpdf), relatórios descritivos, menus e rotas:
+```bash
+idiario-diario-unificado
 ```
 
 ---

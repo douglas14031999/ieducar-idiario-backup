@@ -122,6 +122,7 @@ bootstrap_environment() {
     ln -sf "${INSTALL_DIR}/scripts/setup-idiario-profile.sh" /usr/local/bin/idiario-perfil
     ln -sf "${INSTALL_DIR}/scripts/install-ieducar.sh" /usr/local/bin/ieducar-install
     ln -sf "${INSTALL_DIR}/scripts/install-idiario.sh" /usr/local/bin/idiario-install
+    ln -sf "${INSTALL_DIR}/scripts/setup-idiario-class-diary.sh" /usr/local/bin/idiario-diario-unificado
 
     render_progress_bar 100 "Carregamento concluído com êxito!"
     echo ""
@@ -316,6 +317,12 @@ action_install_idiario() {
     "${INSTALL_DIR}/scripts/install-idiario.sh" || true
 }
 
+# Ação: Instalar Diário de Classe Unificado no i-Diário
+action_setup_class_diary() {
+    echo ""
+    "${INSTALL_DIR}/scripts/setup-idiario-class-diary.sh" || true
+}
+
 # ==============================================================================
 # MENU PRINCIPAL INTERATIVO
 # ==============================================================================
@@ -331,6 +338,10 @@ case "${1:-}" in
         ;;
     --install-idiario|-idiario)
         action_install_idiario
+        exit 0
+        ;;
+    --class-diary|--diario-unificado|-du)
+        action_setup_class_diary
         exit 0
         ;;
     --backup|-b)
@@ -378,13 +389,14 @@ while true; do
     echo -e "   ${GREEN}[6]${NC} ⚡  Configurar / Otimizar Memória SWAP (4GB + swappiness=10)"
     echo -e "   ${GREEN}[7]${NC} 🗺️  Migrar PMD para Leaflet/OpenStreetMap (Pré-Matrícula Digital)"
     echo -e "   ${GREEN}[8]${NC} 👤  Corrigir Foto de Perfil & Menu no i-Diário"
-    echo -e "   ${GREEN}[9]${NC} 🔄  Restaurar um Backup do MinIO (Assistente de Restauração)"
-    echo -e "   ${GREEN}[10]${NC} 📦 Executar Backup Manual Completo Agora"
+    echo -e "   ${GREEN}[9]${NC} 📑  Instalar Diário de Classe Escolar Unificado (i-Diário)"
+    echo -e "   ${GREEN}[10]${NC} 🔄 Restaurar um Backup do MinIO (Assistente de Restauração)"
+    echo -e "   ${GREEN}[11]${NC} 📦 Executar Backup Manual Completo Agora"
     echo -e "   ${YELLOW}[0]${NC} 🚪  Sair"
     echo -e "${CYAN}======================================================================${NC}"
 
     CHOICE=""
-    read_input " Digite a opção desejada [0-10]: " "" CHOICE
+    read_input " Digite a opção desejada [0-11]: " "" CHOICE
 
     # Prevenção contra loop infinito em terminais não-interativos
     if [[ -z "$CHOICE" ]] && [ ! -e /dev/tty ]; then
@@ -418,9 +430,12 @@ while true; do
             action_setup_idiario_profile
             ;;
         9)
-            action_restore
+            action_setup_class_diary
             ;;
         10)
+            action_restore
+            ;;
+        11)
             action_test_backup
             ;;
         0|sair|exit|q)
@@ -430,7 +445,7 @@ while true; do
             exit 0
             ;;
         *)
-            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 10.${NC}"
+            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 11.${NC}"
             ;;
     esac
 

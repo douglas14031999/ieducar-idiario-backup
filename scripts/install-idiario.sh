@@ -388,6 +388,14 @@ elif [[ -f "$(dirname "$0")/setup-idiario-profile.sh" ]]; then
     "$(dirname "$0")/setup-idiario-profile.sh" || true
 fi
 
+# Instalação do Diário de Classe Escolar Unificado
+echo -e "${YELLOW} -> Configurando Diário de Classe Escolar Unificado...${NC}"
+if [[ -f "/opt/ieducar-backup/scripts/setup-idiario-class-diary.sh" ]]; then
+    /opt/ieducar-backup/scripts/setup-idiario-class-diary.sh "$IDIARIO_DIR" || true
+elif [[ -f "$(dirname "$0")/setup-idiario-class-diary.sh" ]]; then
+    "$(dirname "$0")/setup-idiario-class-diary.sh" "$IDIARIO_DIR" || true
+fi
+
 echo ""
 echo -e "${GREEN}======================================================================${NC}"
 echo -e "${GREEN}   🎉 PARABÉNS! INSTALAÇÃO DO I-DIÁRIO CONCLUÍDA COM SUCESSO!        ${NC}"
