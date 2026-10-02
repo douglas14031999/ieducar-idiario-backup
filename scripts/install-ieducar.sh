@@ -242,13 +242,23 @@ server {
 
     index index.php index.html;
 
+    error_page 404 /index.php;
+
     location / {
         try_files \$uri \$uri/ /index.php?\$query_string;
     }
 
+    location ~* \.(jpg|jpeg|gif|png|css|js|ico|svg|woff|woff2|ttf|eot)$ {
+        expires 30d;
+        access_log off;
+        try_files \$uri =404;
+    }
+
     location ~ \.php$ {
-        include snippets/fastcgi-php.conf;
+        try_files \$uri /index.php?\$query_string;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
         fastcgi_pass unix:${PHP_SOCK};
+        fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;
         include fastcgi_params;
     }
@@ -260,8 +270,11 @@ server {
 NGINX_CONF
 fi
 
+rm -rf "${IEDUCAR_DIR}/public/intranet/index.php" 2>/dev/null || true
+
 systemctl restart "php${PHP_VER}-fpm" || true
-nginx -t && systemctl reload nginx || systemctl restart nginx
+systemctl daemon-reload 2>/dev/null || true
+nginx -t && (systemctl restart nginx || systemctl start nginx)
 
 echo -e "${YELLOW}[9/16] Instalando pacotes do Core do i-Educar (${IEDUCAR_VERSION})...${NC}"
 cd "$IEDUCAR_DIR"
