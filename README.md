@@ -4,13 +4,23 @@ Sistema completo e automatizado para backup periódico do **i-Educar** e **i-Di�
 
 ---
 
-## 🚀 Instalação Rápida (Comando Único via Curl)
+## 🚀 Instalação Rápida e Central de Automação (Menu Interativo)
 
-Para instalar e configurar todo o ambiente na sua VPS com apenas um comando, acesse o terminal como `root` e execute:
+Para acessar o painel de ferramentas completo na sua VPS com apenas um comando, execute como `root`:
 
 ```bash
 curl -fsSL https://raw.githubusercontent.com/douglas14031999/ieducar-idiario-backup/main/install.sh | bash
 ```
+
+Ao executar, o script abre uma **Central Interativa** no terminal, permitindo escolher facilmente o que deseja configurar:
+- `[1]` 🛡️ **Configurar Backups Automáticos** (MinIO, Cron 23:59, Retenção, SWAP)
+- `[2]` 🧬 **Popular Banco de Dados** (24 Seeders essenciais do Educacenso)
+- `[3]` 🎨 **Configurar Tela de Atalhos Rápidos** (Dashboard moderno no i-Educar)
+- `[4]` 🔄 **Restaurar um Backup do MinIO** (Assistente de Restauração)
+- `[5]` ⚡ **Executar Teste de Backup Manual**
+- `[0]` 🚪 **Sair**
+
+> 💡 *Após cada ação concluída, o script retorna automaticamente à tela inicial para que você possa efetuar outras operações sem precisar reiniciá-lo.*
 
 ---
 
@@ -96,7 +106,13 @@ Principais parâmetros:
 
 Após a instalação, os seguintes comandos globais ficam disponíveis em qualquer lugar do terminal:
 
-### 1. Executar Backup Manual Imediato
+### 1. Central de Ferramentas e Menu Interativo
+Para abrir o menu principal interativo a qualquer momento:
+```bash
+ieducar-menu
+```
+
+### 2. Executar Backup Manual Imediato
 Para forçar a execução do backup a qualquer momento e acompanhar o log em tempo real:
 ```bash
 ieducar-backup
