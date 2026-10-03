@@ -172,6 +172,10 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
 
         /* Botão para alternar visibilidade da senha limpo e sem bordas/fundo */
         #togglePasswordBtn {
+            position: absolute !important;
+            top: 0 !important;
+            bottom: 0 !important;
+            right: 0.875rem !important;
             background: transparent !important;
             background-color: transparent !important;
             border: none !important;
@@ -184,6 +188,7 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
             align-items: center !important;
             justify-content: center !important;
             line-height: 1 !important;
+            z-index: 10 !important;
         }
         #togglePasswordBtn svg {
             width: 1.125rem !important;
@@ -483,10 +488,10 @@ cat << 'EOF' > "$LOGIN_VIEW"
                        required 
                        type="password">
                 <button aria-label="Alternar visibilidade da senha" 
-                        class="absolute inset-y-0 right-0 pr-3.5 flex items-center justify-center text-slate-400 hover:text-[#1b4c6b] transition focus:outline-none z-10" 
+                        class="absolute inset-y-0 right-0 flex items-center justify-center text-slate-400 hover:text-[#1b4c6b] transition focus:outline-none z-10" 
                         id="togglePasswordBtn" 
                         type="button"
-                        style="background: transparent !important; border: none !important; outline: none !important; box-shadow: none !important;">
+                        style="background: transparent !important; border: none !important; outline: none !important; box-shadow: none !important; right: 0.875rem !important;">
                     <!-- Ícone Olho Aberto -->
                     <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="width: 1.15rem; height: 1.15rem; display: inline-block !important;">
                         <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" fill="none" style="fill: none !important; stroke: currentColor !important;"></path>
