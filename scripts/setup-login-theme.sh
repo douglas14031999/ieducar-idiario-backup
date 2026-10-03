@@ -2,8 +2,13 @@
 # ==============================================================================
 # Script: setup-login-theme.sh
 # Objetivo: Aplicar o design moderno Glassmorphism (Sistema Canoa 2026 / Lagoa da Canoa)
-#           na tela de login do i-Educar, preservando 100% dos dados dinâmicos,
-#           rotas de autenticação (Asset::get('login')), tokens, GTM e reCAPTCHA.
+#           em TODAS as telas públicas do i-Educar:
+#           - Login (auth/login.blade.php)
+#           - Recuperação / Redefinição de Senha (auth/passwords/email.blade.php)
+#           - Redefinição de Senha com Token (auth/passwords/reset.blade.php)
+#           - Troca Obrigatória de Senha (password/change.blade.php)
+#           - Layout Base Público (layout/public.blade.php)
+#           Preservando 100% dos dados dinâmicos, rotas, tokens, GTM e reCAPTCHA.
 # ==============================================================================
 
 set -euo pipefail
@@ -18,10 +23,10 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 echo -e "${CYAN}======================================================================${NC}"
-echo -e "${CYAN}   🎨  TEMA MODERNO DE LOGIN - I-EDUCAR (SISTEMA CANOA 2026)          ${NC}"
+echo -e "${CYAN}   🎨  TEMA MODERNO DE LOGIN & SENHAS - I-EDUCAR (CANOA 2026)         ${NC}"
 echo -e "${CYAN}======================================================================${NC}"
 echo -e "Aplicando design com Glassmorphism, ondas orgânicas, paleta oficial"
-echo -e "e preservando todos os itens dinâmicos e de segurança do Laravel."
+echo -e "em todas as telas públicas (Login, Redefinição e Troca de Senha)."
 echo -e "${CYAN}----------------------------------------------------------------------${NC}\n"
 
 # 1. Checagem de privilégios de root
@@ -71,21 +76,21 @@ cd "$IEDUCAR_DIR"
 TIMESTAMP=$(date +%Y%m%d%H%M%S)
 PUBLIC_LAYOUT="${IEDUCAR_DIR}/resources/views/layout/public.blade.php"
 LOGIN_VIEW="${IEDUCAR_DIR}/resources/views/auth/login.blade.php"
+EMAIL_PASS_VIEW="${IEDUCAR_DIR}/resources/views/auth/passwords/email.blade.php"
+RESET_PASS_VIEW="${IEDUCAR_DIR}/resources/views/auth/passwords/reset.blade.php"
+CHANGE_PASS_VIEW="${IEDUCAR_DIR}/resources/views/password/change.blade.php"
 
 # 3. Criar backup dos arquivos originais
-echo -e "\n${YELLOW}[1/4] Criando backup de segurança das views atuais...${NC}"
-if [[ -f "$PUBLIC_LAYOUT" ]]; then
-    cp "$PUBLIC_LAYOUT" "${PUBLIC_LAYOUT}.bak.${TIMESTAMP}"
-    echo -e "      Backup de public.blade.php salvo em: ${CYAN}${PUBLIC_LAYOUT}.bak.${TIMESTAMP}${NC}"
-fi
-
-if [[ -f "$LOGIN_VIEW" ]]; then
-    cp "$LOGIN_VIEW" "${LOGIN_VIEW}.bak.${TIMESTAMP}"
-    echo -e "      Backup de login.blade.php salvo em:  ${CYAN}${LOGIN_VIEW}.bak.${TIMESTAMP}${NC}"
-fi
+echo -e "\n${YELLOW}[1/6] Criando backup de segurança das views atuais...${NC}"
+for f in "$PUBLIC_LAYOUT" "$LOGIN_VIEW" "$EMAIL_PASS_VIEW" "$RESET_PASS_VIEW" "$CHANGE_PASS_VIEW"; do
+    if [[ -f "$f" ]]; then
+        cp "$f" "${f}.bak.${TIMESTAMP}"
+        echo -e "      Backup salvo: ${CYAN}${f}.bak.${TIMESTAMP}${NC}"
+    fi
+done
 
 # 4. Escrever o novo layout base (layout.public)
-echo -e "\n${YELLOW}[2/4] Escrevendo layout público moderno (layout.public.blade.php)...${NC}"
+echo -e "\n${YELLOW}[2/6] Escrevendo layout público moderno (layout.public.blade.php)...${NC}"
 mkdir -p "$(dirname "$PUBLIC_LAYOUT")"
 
 cat << 'EOF' > "$PUBLIC_LAYOUT"
@@ -146,6 +151,84 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
         }
         .btn-glow:hover {
             box-shadow: 0 6px 24px rgba(19, 94, 70, 0.42);
+        }
+
+        /* Estilização de contingência para qualquer elemento legado dentro de #login-form */
+        #login-form h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            text-align: center;
+            color: #0f172a;
+            margin-bottom: 0.5rem;
+        }
+        #login-form p {
+            font-size: 0.75rem;
+            color: #64748b;
+            text-align: center;
+            margin-bottom: 1rem;
+        }
+        #login-form label {
+            display: block;
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: #334155;
+            margin-bottom: 0.25rem;
+            margin-top: 0.75rem;
+        }
+        #login-form input[type="text"],
+        #login-form input[type="password"] {
+            display: block;
+            width: 100%;
+            padding: 0.625rem 0.875rem;
+            font-size: 0.75rem;
+            color: #0f172a;
+            background-color: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(203, 213, 225, 0.8);
+            border-radius: 0.75rem;
+            outline: none;
+            box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+            box-sizing: border-box;
+        }
+        #login-form input[type="text"]:focus,
+        #login-form input[type="password"]:focus {
+            border-color: #135e46;
+            box-shadow: 0 0 0 3px rgba(19, 94, 70, 0.12);
+        }
+        #login-form button.submit,
+        #login-form button[type="submit"] {
+            width: 100%;
+            margin-top: 1rem;
+            padding: 0.75rem 1rem;
+            color: #ffffff;
+            font-size: 0.75rem;
+            font-weight: 600;
+            letter-spacing: 0.025em;
+            border-radius: 0.75rem;
+            background-color: #135e46;
+            border: none;
+            cursor: pointer;
+            box-shadow: 0 4px 18px rgba(19, 94, 70, 0.32);
+            transition: all 0.15s ease-in-out;
+        }
+        #login-form button.submit:hover,
+        #login-form button[type="submit"]:hover {
+            background-color: #0e4936;
+            box-shadow: 0 6px 24px rgba(19, 94, 70, 0.42);
+        }
+        #login-form .remember {
+            margin-top: 0.75rem;
+            text-align: center;
+            font-size: 0.75rem;
+        }
+        #login-form .remember a {
+            color: #135e46;
+            font-weight: 600;
+            font-size: 0.75rem;
+            text-decoration: none;
+        }
+        #login-form .remember a:hover {
+            text-decoration: underline;
+            color: #0e4936;
         }
     </style>
 
@@ -270,10 +353,10 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
 </html>
 EOF
 
-echo -e "${GREEN}✓ Layout base (public.blade.php) gerado com sucesso!${NC}"
+echo -e "${GREEN}✓ Layout base (public.blade.php) atualizado com sucesso!${NC}"
 
-# 5. Escrever a tela de login (auth.login)
-echo -e "\n${YELLOW}[3/4] Escrevendo formulário de login (auth/login.blade.php)...${NC}"
+# 5. Escrever a tela de login (auth/login.blade.php)
+echo -e "\n${YELLOW}[3/6] Escrevendo formulário de login (auth/login.blade.php)...${NC}"
 mkdir -p "$(dirname "$LOGIN_VIEW")"
 
 cat << 'EOF' > "$LOGIN_VIEW"
@@ -431,22 +514,301 @@ cat << 'EOF' > "$LOGIN_VIEW"
 @endsection
 EOF
 
-echo -e "${GREEN}✓ View de login (login.blade.php) gerada com sucesso!${NC}"
+echo -e "${GREEN}✓ View de login (login.blade.php) atualizada!${NC}"
 
-# 6. Ajustar permissões e limpar cache do Blade
-echo -e "\n${YELLOW}[4/4] Ajustando permissões e limpando cache do Blade...${NC}"
-chown -R www-data:www-data "$PUBLIC_LAYOUT" "$LOGIN_VIEW" 2>/dev/null || true
-chmod 664 "$PUBLIC_LAYOUT" "$LOGIN_VIEW" 2>/dev/null || true
+# 6. Escrever a tela de solicitação de redefinição de senha (auth/passwords/email.blade.php)
+echo -e "\n${YELLOW}[4/6] Escrevendo tela de recuperação de senha (auth/passwords/email.blade.php)...${NC}"
+mkdir -p "$(dirname "$EMAIL_PASS_VIEW")"
+
+cat << 'EOF' > "$EMAIL_PASS_VIEW"
+@extends('layout.public')
+
+@section('content')
+    <div class="text-center mb-5">
+        <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-snug">
+            Recuperação de acesso
+        </h1>
+        <p class="text-xs text-slate-500 mt-1">
+            Informe sua matrícula institucional para prosseguir com a redefinição de senha.
+        </p>
+    </div>
+
+    <form action="{{ route('password.email') }}" method="post" id="form-password-email" class="space-y-4">
+        {{ csrf_field() }}
+
+        <!-- Campo: Matrícula -->
+        <div data-purpose="matricula-input-group">
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="login">
+                Matrícula institucional
+            </label>
+            <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                    </svg>
+                </div>
+                <input class="block w-full pl-9 pr-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none font-normal" 
+                       id="login" 
+                       name="login" 
+                       value="{{ old('login') }}" 
+                       placeholder="Ex: admin" 
+                       required 
+                       type="text" 
+                       autofocus>
+            </div>
+        </div>
+
+        <!-- Botão CTA -->
+        <button id="form-login-submit" 
+                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-xl bg-[#135e46] hover:bg-[#0e4936] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#135e46] focus:ring-offset-2" 
+                type="submit">
+            <span>Redefinir Senha</span>
+            <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+            </svg>
+        </button>
+
+        <!-- Link Voltar -->
+        <div class="pt-2 text-center">
+            <a href="{{ Asset::get('login') }}" 
+               class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#135e46] hover:text-[#0e4936] hover:underline transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                </svg>
+                Voltar para o login
+            </a>
+        </div>
+    </form>
+@endsection
+EOF
+
+echo -e "${GREEN}✓ View de recuperação de senha (passwords/email.blade.php) atualizada!${NC}"
+
+# 7. Escrever a tela de redefinição com token (auth/passwords/reset.blade.php)
+echo -e "\n${YELLOW}[5/6] Escrevendo tela de nova senha com token (auth/passwords/reset.blade.php)...${NC}"
+mkdir -p "$(dirname "$RESET_PASS_VIEW")"
+
+cat << 'EOF' > "$RESET_PASS_VIEW"
+@extends('layout.public')
+
+@section('content')
+    <div class="text-center mb-5">
+        <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-snug">
+            Criar nova senha
+        </h1>
+        <p class="text-xs text-slate-500 mt-1">
+            Defina uma nova senha de acesso segura para a sua conta.
+        </p>
+    </div>
+
+    <form action="{{ route('password.update') }}" method="post" id="form-password-reset" class="space-y-4">
+        {{ csrf_field() }}
+        <input type="hidden" name="token" value="{{ $token }}">
+
+        <!-- Matrícula -->
+        <div data-purpose="matricula-input-group">
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="login">
+                Matrícula institucional
+            </label>
+            <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                    </svg>
+                </div>
+                <input class="block w-full pl-9 pr-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none font-normal" 
+                       id="login" 
+                       name="login" 
+                       value="{{ old('login') }}" 
+                       placeholder="Ex: admin" 
+                       required 
+                       type="text">
+            </div>
+        </div>
+
+        <!-- Nova Senha -->
+        <div data-purpose="password-input-group">
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="password">
+                Nova senha
+            </label>
+            <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                    </svg>
+                </div>
+                <input class="block w-full pl-9 pr-10 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none" 
+                       id="password" 
+                       name="password" 
+                       placeholder="••••••••" 
+                       required 
+                       type="password">
+            </div>
+        </div>
+
+        <!-- Confirmar Senha -->
+        <div data-purpose="password-confirm-group">
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="password-confirm">
+                Confirme a nova senha
+            </label>
+            <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                    </svg>
+                </div>
+                <input class="block w-full pl-9 pr-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none" 
+                       id="password-confirm" 
+                       name="password_confirmation" 
+                       placeholder="••••••••" 
+                       required 
+                       type="password">
+            </div>
+        </div>
+
+        <!-- Botão CTA -->
+        <button id="form-login-submit" 
+                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-xl bg-[#135e46] hover:bg-[#0e4936] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#135e46] focus:ring-offset-2" 
+                type="submit">
+            <span>Salvar Nova Senha</span>
+            <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+            </svg>
+        </button>
+
+        <!-- Link Voltar -->
+        <div class="pt-2 text-center">
+            <a href="{{ route('login') }}" 
+               class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#135e46] hover:text-[#0e4936] hover:underline transition">
+                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                </svg>
+                Voltar para o login
+            </a>
+        </div>
+    </form>
+@endsection
+EOF
+
+echo -e "${GREEN}✓ View de redefinição com token (passwords/reset.blade.php) atualizada!${NC}"
+
+# 8. Escrever a tela de troca obrigatória de senha (password/change.blade.php)
+if [[ -d "$(dirname "$CHANGE_PASS_VIEW")" || -f "$CHANGE_PASS_VIEW" ]]; then
+    mkdir -p "$(dirname "$CHANGE_PASS_VIEW")"
+    cat << 'EOF' > "$CHANGE_PASS_VIEW"
+@extends('layout.public')
+
+@section('content')
+    <div class="text-center mb-5">
+        <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-snug">
+            Alteração de senha
+        </h1>
+        <p class="text-xs text-slate-500 mt-1">
+            Para sua segurança institucional, sua senha provisória deve ser alterada.
+        </p>
+    </div>
+
+    <form action="{{ route('post-change-password') }}" method="post" id="form-change-password" class="space-y-4">
+        {{ csrf_field() }}
+
+        <!-- Matrícula -->
+        <div data-purpose="matricula-input-group">
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="login">
+                Matrícula institucional
+            </label>
+            <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                    </svg>
+                </div>
+                <input class="block w-full pl-9 pr-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none font-normal" 
+                       id="login" 
+                       name="login" 
+                       value="{{ old('login') }}" 
+                       placeholder="Ex: admin" 
+                       required 
+                       type="text">
+            </div>
+        </div>
+
+        <!-- Nova Senha -->
+        <div data-purpose="password-input-group">
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="password">
+                Nova senha
+            </label>
+            <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                    </svg>
+                </div>
+                <input class="block w-full pl-9 pr-10 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none" 
+                       id="password" 
+                       name="password" 
+                       placeholder="••••••••" 
+                       required 
+                       type="password">
+            </div>
+        </div>
+
+        <!-- Confirmar Senha -->
+        <div data-purpose="password-confirm-group">
+            <label class="block text-xs font-semibold text-slate-700 mb-1" for="password-confirm">
+                Confirme a nova senha
+            </label>
+            <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                    </svg>
+                </div>
+                <input class="block w-full pl-9 pr-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none" 
+                       id="password-confirm" 
+                       name="password_confirmation" 
+                       placeholder="••••••••" 
+                       required 
+                       type="password">
+            </div>
+        </div>
+
+        <!-- Botão CTA -->
+        <button id="form-login-submit" 
+                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-xl bg-[#135e46] hover:bg-[#0e4936] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#135e46] focus:ring-offset-2" 
+                type="submit">
+            <span>Atualizar Senha</span>
+            <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path d="M14 5l7 7m0 0l-7 7m7-7H3" stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2"></path>
+            </svg>
+        </button>
+    </form>
+@endsection
+EOF
+    echo -e "${GREEN}✓ View de troca obrigatória de senha (password/change.blade.php) atualizada!${NC}"
+fi
+
+# 9. Ajustar permissões e limpar cache do Blade
+echo -e "\n${YELLOW}[6/6] Ajustando permissões e limpando cache do Blade...${NC}"
+chown -R www-data:www-data "$PUBLIC_LAYOUT" "$LOGIN_VIEW" "$EMAIL_PASS_VIEW" "$RESET_PASS_VIEW" 2>/dev/null || true
+if [[ -f "$CHANGE_PASS_VIEW" ]]; then
+    chown -R www-data:www-data "$CHANGE_PASS_VIEW" 2>/dev/null || true
+fi
+chmod 664 "$PUBLIC_LAYOUT" "$LOGIN_VIEW" "$EMAIL_PASS_VIEW" "$RESET_PASS_VIEW" 2>/dev/null || true
+if [[ -f "$CHANGE_PASS_VIEW" ]]; then
+    chmod 664 "$CHANGE_PASS_VIEW" 2>/dev/null || true
+fi
 
 php artisan view:clear || true
 php artisan optimize:clear 2>/dev/null || true
 
 echo -e "\n${GREEN}======================================================================${NC}"
-echo -e "${GREEN}  ✓ TEMA DE LOGIN MODERNO APLICADO COM SUCESSO!                      ${NC}"
+echo -e "${GREEN}  ✓ TEMA MODERNO APLICADO EM TODAS AS TELAS PÚBLICAS COM SUCESSO!     ${NC}"
 echo -e "${GREEN}======================================================================${NC}"
-echo -e " • Layout Base:  ${CYAN}${PUBLIC_LAYOUT}${NC}"
-echo -e " • View Login:   ${CYAN}${LOGIN_VIEW}${NC}"
-echo -e " • Estilo:       ${GREEN}Glassmorphism + Ondas Orgânicas Canoa 2026${NC}"
-echo -e " • Autenticação: ${GREEN}100% preservada (Asset::get('login'), tokens e CSRF)${NC}"
-echo -e " • Segurança:    ${GREEN}GTM, ReCAPTCHA v3 e bloqueio por tentativas mantidos${NC}"
+echo -e " • Layout Base:          ${CYAN}${PUBLIC_LAYOUT}${NC}"
+echo -e " • Login:                ${CYAN}${LOGIN_VIEW}${NC}"
+echo -e " • Redefinição de Senha: ${CYAN}${EMAIL_PASS_VIEW}${NC}"
+echo -e " • Nova Senha com Token: ${CYAN}${RESET_PASS_VIEW}${NC}"
+echo -e " • Troca de Senha:       ${CYAN}${CHANGE_PASS_VIEW}${NC}"
+echo -e " • Estilo:               ${GREEN}Glassmorphism + Ondas Orgânicas Canoa 2026${NC}"
+echo -e " • Autenticação:         ${GREEN}100% preservada (Asset::get('login'), tokens e CSRF)${NC}"
 echo -e "${GREEN}======================================================================${NC}\n"
