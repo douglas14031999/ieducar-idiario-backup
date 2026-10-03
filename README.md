@@ -24,8 +24,11 @@ Ao executar, o script abre uma **Central Interativa** no terminal, permitindo es
 - `[9]` 📑 **Instalar Diário de Classe Escolar Unificado** (i-Diário)
 - `[10]` 🎯 **Instalar Gabarito OMR & Elaborador de Provas** (FastAPI, OpenCV)
 - `[11]` 🔒 **Configurar Domínios & SSL HTTPS** (i-Educar & i-Diário)
-- `[12]` 🔄 **Restaurar um Backup do MinIO** (Assistente de Restauração)
-- `[13]` 📦 **Executar Backup Manual Completo Agora**
+- `[12]` 📦 **Instalar / Atualizar Pacote Educacenso** (Censos 2024, 2025 e 2026 - Douglas)
+- `[13]` 🛠️ **Corrigir Ativos HTTPS / CSS Sem Estilo no i-Educar**
+- `[14]` 🖼️ **Aplicar Tema Moderno de Login** (Sistema Canoa 2026)
+- `[15]` 🔄 **Restaurar um Backup do MinIO** (Assistente de Restauração)
+- `[16]` 💾 **Executar Backup Manual Completo Agora**
 - `[0]` 🚪 **Sair**
 
 > 💡 *Após cada ação concluída, o script retorna automaticamente à tela inicial para que você possa efetuar outras operações sem precisar reiniciá-lo.*
@@ -67,6 +70,9 @@ cd /opt/ieducar-backup && git pull origin main
 - 📑 **Diário de Classe Escolar Unificado (i-Diário):** Emite em um único PDF mesclado a Capa Oficial, Frequência, Notas, Avaliações Descritivas/Pareceres, Conteúdos, Observações e 2ª assinatura (`idiario-diario-unificado`).
 - 🎯 **Gabarito OMR & Elaborador de Provas (BNCC):** Sistema autohospedável para elaboração de avaliações, geração de folhas de respostas em PDF e correção instantânea por visão computacional via smartphone (`omr-install`).
 - 🔒 **Configuração Automática de Domínio & SSL HTTPS (Let's Encrypt):** Permite informar apenas os domínios apontados para a VPS. O script configura automaticamente os blocos do Nginx, emite certificados SSL com renovação automática (Certbot) e, no **i-Diário**, substitui automaticamente o IP na tabela `entities` do PostgreSQL pelo novo domínio (`ieducar-ssl`).
+- 📦 **Módulo Educacenso 2024 / 2025 / 2026 (Douglas):** Instalação e atualização inteligente com suporte aos Censos 2024, 2025 e 2026, correções de integridade de dados (vínculo de servidores, turnos e alocações), auto-descoberta no Composer, migrations e menu de importação (`ieducar-educacenso`).
+- 🛠️ **Correção de Ativos HTTPS / Mixed Content (i-Educar):** Soluciona problemas de CSS e JavaScript não carregados via HTTPS, configurando `APP_URL`, `ASSET_URL`, TrustProxies e esquemas de URL (`ieducar-fix-https`).
+- 🖼️ **Tema de Login Moderno (Sistema Canoa 2026):** Redesign completo da tela de login com Glassmorphism, ondas orgânicas, paleta oficial da Prefeitura de Lagoa da Canoa, preservando 100% dos dados dinâmicos, tokens de autenticação, CSRF, GTM e reCAPTCHA (`ieducar-login-theme`).
 - 🔔 **Notificações:** Suporte a webhooks de alerta no Discord e Telegram.
 
 ---
@@ -84,6 +90,9 @@ cd /opt/ieducar-backup && git pull origin main
 │   ├── setup-idiario-class-diary.sh # Diário de Classe Escolar Unificado para o i-Diário
 │   ├── install-omr.sh          # Instalador do Gabarito OMR & Elaborador de Provas (BNCC)
 │   ├── setup-domain-ssl.sh     # Automação de Nginx, SSL Certbot e migração de entidades do i-Diário
+│   ├── install-educacenso.sh   # Instalador e atualizador inteligente do pacote Educacenso (2024-2026)
+│   ├── fix-ieducar-https.sh    # Correção de CSS, JS e ativos HTTPS (Mixed Content) no i-Educar
+│   ├── setup-login-theme.sh    # Aplicador do tema moderno de login (Sistema Canoa 2026)
 │   ├── backup.sh               # Script principal executado pelo cron (dumps, sync e MinIO)
 │   ├── restore.sh              # Utilitário interativo de restauração
 │   ├── setup-dashboard.sh      # Configurador automático da tela de atalhos rápidos do i-Educar
@@ -230,6 +239,46 @@ Antes de executar o comando ou a opção `[11]` do menu, crie os registros do **
 > 1. **Cloudflare:** Deixe o proxy desativado (**Nuvem Cinza / DNS Only**) durante a emissão inicial para não bloquear o desafio HTTP do Certbot. Após emitir o certificado, você pode reativar a nuvem laranja com o SSL em modo *Full (Strict)*.
 > 2. **Portas 80 e 443:** Devem estar abertas no firewall do servidor (UFW) e no Security Group da nuvem (AWS, Oracle Cloud, Hetzner, etc.).
 > 3. **i-Diário (Banco de Dados):** O script substitui automaticamente o IP gravado na tabela `entities` do PostgreSQL pelo novo domínio HTTPS, evitando problemas de redirecionamento ou carregamento de ativos no Rails.
+
+---
+
+### 16. Instalar / Atualizar Módulo Educacenso (Censos 2024, 2025 e 2026 - Douglas)
+Módulo desacoplado do Educacenso para o [i-Educar](https://github.com/portabilis/i-educar), com suporte aos Censos **2024**, **2025** e **2026** e correções de integridade de dados (vínculo de servidores, turnos e alocações):
+
+```bash
+ieducar-educacenso
+```
+
+Você também pode instalar ou atualizar diretamente na sua VPS com o comando one-liner:
+```bash
+curl -fsSL https://raw.githubusercontent.com/douglas14031999/i-educar-educacenso-package/2.12/install.sh | bash
+```
+
+**🤖 O que este script faz automaticamente:**
+- **Detecção Inteligente:**
+  - Se o pacote não estiver instalado: clona e configura o repositório em `packages/portabilis/i-educar-educacenso-package` (branch `2.12`).
+  - Se já for o seu repositório (`douglas14031999`): realiza o `fetch`, `checkout 2.12` e `reset --hard` para a versão mais recente com atualização instantânea.
+  - Se for o repositório da Portabilis ou versão legada: cria um backup de segurança (`.bak.<timestamp>`), remove a versão antiga e instala o novo repositório limpo.
+- **Permissões de Arquivos:** Ajusta donos e permissões para `www-data:www-data` e `775`.
+- **Autoload do Composer:** Executa `composer dump-autoload --optimize` com descoberta automática do pacote no i-Educar.
+- **Banco e Menus:** Executa `php artisan migrate --force` e registra/ativa o menu **Importações -> Importação educacenso** no sistema.
+- **Limpeza de Caches:** Limpa todos os caches da aplicação (`optimize:clear`, `config:clear`, `cache:clear`, `view:clear`).
+
+---
+
+### 17. Corrigir Carregamento HTTPS / Mixed Content (i-Educar)
+Se o i-Educar carregar sem estilos (tela branca / CSS e JS bloqueados por Mixed Content) após habilitar o HTTPS:
+```bash
+ieducar-fix-https
+```
+
+---
+
+### 18. Aplicar Tema Moderno de Login (Sistema Canoa 2026)
+Aplica o novo design moderno com Glassmorphism, ondas orgânicas e paleta oficial da Prefeitura de Lagoa da Canoa na tela de login do i-Educar, mantendo intactos todos os recursos de autenticação do Laravel (rotas, tokens CSRF, GTM, ReCAPTCHA v3 e bloqueio contra ataques de força bruta):
+```bash
+ieducar-login-theme
+```
 
 ---
 

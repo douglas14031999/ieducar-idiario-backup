@@ -126,6 +126,8 @@ bootstrap_environment() {
     ln -sf "${INSTALL_DIR}/scripts/install-omr.sh" /usr/local/bin/omr-install
     ln -sf "${INSTALL_DIR}/scripts/setup-domain-ssl.sh" /usr/local/bin/ieducar-ssl
     ln -sf "${INSTALL_DIR}/scripts/fix-ieducar-https.sh" /usr/local/bin/ieducar-fix-https
+    ln -sf "${INSTALL_DIR}/scripts/install-educacenso.sh" /usr/local/bin/ieducar-educacenso
+    ln -sf "${INSTALL_DIR}/scripts/setup-login-theme.sh" /usr/local/bin/ieducar-login-theme
 
     render_progress_bar 100 "Carregamento concluído com êxito!"
     echo ""
@@ -338,6 +340,24 @@ action_setup_domain_ssl() {
     "${INSTALL_DIR}/scripts/setup-domain-ssl.sh" || true
 }
 
+# Ação: Instalar / Atualizar Pacote Educacenso 2024-2026 (Douglas)
+action_install_educacenso() {
+    echo ""
+    "${INSTALL_DIR}/scripts/install-educacenso.sh" || true
+}
+
+# Ação: Corrigir Ativos HTTPS / Mixed Content (i-Educar)
+action_fix_https() {
+    echo ""
+    "${INSTALL_DIR}/scripts/fix-ieducar-https.sh" || true
+}
+
+# Ação: Aplicar Tema Moderno de Login no i-Educar (Sistema Canoa 2026)
+action_setup_login_theme() {
+    echo ""
+    "${INSTALL_DIR}/scripts/setup-login-theme.sh" || true
+}
+
 # ==============================================================================
 # MENU PRINCIPAL INTERATIVO
 # ==============================================================================
@@ -367,8 +387,16 @@ case "${1:-}" in
         action_setup_domain_ssl
         exit 0
         ;;
+    --educacenso|--censo|-c)
+        action_install_educacenso
+        exit 0
+        ;;
     --fix-https|--fix-css|-fix)
-        "${INSTALL_DIR}/scripts/fix-ieducar-https.sh" || true
+        action_fix_https
+        exit 0
+        ;;
+    --login-theme|--login|-l)
+        action_setup_login_theme
         exit 0
         ;;
     --backup|-b)
@@ -419,13 +447,16 @@ while true; do
     echo -e "   ${GREEN}[9]${NC} 📑  Instalar Diário de Classe Escolar Unificado (i-Diário)"
     echo -e "   ${GREEN}[10]${NC} 🎯 Instalar Gabarito OMR & Elaborador de Provas (FastAPI, OpenCV)"
     echo -e "   ${GREEN}[11]${NC} 🔒 Configurar Domínios & SSL HTTPS (i-Educar & i-Diário)"
-    echo -e "   ${GREEN}[12]${NC} 🔄 Restaurar um Backup do MinIO (Assistente de Restauração)"
-    echo -e "   ${GREEN}[13]${NC} 📦 Executar Backup Manual Completo Agora"
+    echo -e "   ${GREEN}[12]${NC} 📦 Instalar / Atualizar Pacote Educacenso (Censos 2024, 2025 e 2026)"
+    echo -e "   ${GREEN}[13]${NC} 🛠️  Corrigir Ativos HTTPS / CSS Sem Estilo no i-Educar"
+    echo -e "   ${GREEN}[14]${NC} 🖼️  Aplicar Tema Moderno de Login (Sistema Canoa 2026)"
+    echo -e "   ${GREEN}[15]${NC} 🔄 Restaurar um Backup do MinIO (Assistente de Restauração)"
+    echo -e "   ${GREEN}[16]${NC} 💾 Executar Backup Manual Completo Agora"
     echo -e "   ${YELLOW}[0]${NC} 🚪  Sair"
     echo -e "${CYAN}======================================================================${NC}"
 
     CHOICE=""
-    read_input " Digite a opção desejada [0-13]: " "" CHOICE
+    read_input " Digite a opção desejada [0-16]: " "" CHOICE
 
     # Prevenção contra loop infinito em terminais não-interativos
     if [[ -z "$CHOICE" ]] && [ ! -e /dev/tty ]; then
@@ -468,9 +499,18 @@ while true; do
             action_setup_domain_ssl
             ;;
         12)
-            action_restore
+            action_install_educacenso
             ;;
         13)
+            action_fix_https
+            ;;
+        14)
+            action_setup_login_theme
+            ;;
+        15)
+            action_restore
+            ;;
+        16)
             action_test_backup
             ;;
         0|sair|exit|q)
@@ -480,7 +520,7 @@ while true; do
             exit 0
             ;;
         *)
-            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 13.${NC}"
+            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 16.${NC}"
             ;;
     esac
 

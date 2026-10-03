@@ -319,16 +319,26 @@ fi
 composer plug-and-play || true
 php artisan migrate --force || true
 
-echo -e "${YELLOW}[13/16] Instalando Módulo do Educacenso...${NC}"
-if [[ ! -d "$IEDUCAR_DIR/packages/portabilis/i-educar-educacenso-package" ]]; then
-    git clone https://github.com/portabilis/i-educar-educacenso-package.git "$IEDUCAR_DIR/packages/portabilis/i-educar-educacenso-package"
+echo -e "${YELLOW}[13/16] Instalando Módulo do Educacenso (Censos 2024, 2025 e 2026 - Douglas)...${NC}"
+SCRIPT_EDUCACENSO="$(dirname "$0")/install-educacenso.sh"
+if [[ -f "$SCRIPT_EDUCACENSO" ]]; then
+    bash "$SCRIPT_EDUCACENSO" || true
+elif [[ -f "/opt/ieducar-backup/scripts/install-educacenso.sh" ]]; then
+    bash "/opt/ieducar-backup/scripts/install-educacenso.sh" || true
 else
-    cd "$IEDUCAR_DIR/packages/portabilis/i-educar-educacenso-package" && git pull origin master || true
-    cd "$IEDUCAR_DIR"
+    if [[ ! -d "$IEDUCAR_DIR/packages/portabilis/i-educar-educacenso-package" ]]; then
+        git clone -b 2.12 https://github.com/douglas14031999/i-educar-educacenso-package.git "$IEDUCAR_DIR/packages/portabilis/i-educar-educacenso-package"
+    else
+        cd "$IEDUCAR_DIR/packages/portabilis/i-educar-educacenso-package" && git fetch origin 2.12 && git checkout 2.12 && git reset --hard origin/2.12 || true
+        cd "$IEDUCAR_DIR"
+    fi
+    chown -R www-data:www-data "$IEDUCAR_DIR/packages/portabilis/i-educar-educacenso-package"
+    chmod -R 775 "$IEDUCAR_DIR/packages/portabilis/i-educar-educacenso-package"
+    composer plug-and-play || true
+    composer dump-autoload --optimize || true
+    php artisan migrate --force || true
+    php artisan cache:clear || true
 fi
-composer plug-and-play || true
-php artisan migrate --force || true
-php artisan cache:clear || true
 
 echo -e "${YELLOW}[14/16] Instalando Módulo de Transporte Escolar...${NC}"
 if [[ ! -d "$IEDUCAR_DIR/packages/portabilis/i-educar-transport-package" ]]; then
