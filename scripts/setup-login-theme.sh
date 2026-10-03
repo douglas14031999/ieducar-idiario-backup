@@ -150,10 +150,10 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
             box-shadow: 0 0 0 3px rgba(27, 76, 107, 0.14);
         }
         .btn-glow {
-            box-shadow: 0 4px 16px rgba(10, 195, 54, 0.36);
+            box-shadow: 0 4px 18px rgba(27, 76, 107, 0.32);
         }
         .btn-glow:hover {
-            box-shadow: 0 6px 22px rgba(10, 195, 54, 0.48);
+            box-shadow: 0 6px 24px rgba(27, 76, 107, 0.44);
         }
 
         /* Regras seguras para espaçamento de ícones e placeholders */
@@ -217,16 +217,16 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
             font-weight: 600;
             letter-spacing: 0.025em;
             border-radius: 0.375rem;
-            background-color: #0ac336;
+            background-color: #1b4c6b;
             border: none;
             cursor: pointer;
-            box-shadow: 0 4px 16px rgba(10, 195, 54, 0.36);
+            box-shadow: 0 4px 18px rgba(27, 76, 107, 0.32);
             transition: all 0.15s ease-in-out;
         }
         #login-form button.submit:hover,
         #login-form button[type="submit"]:hover {
-            background-color: #08a82e;
-            box-shadow: 0 6px 22px rgba(10, 195, 54, 0.48);
+            background-color: #143950;
+            box-shadow: 0 6px 24px rgba(27, 76, 107, 0.44);
         }
         #login-form .remember {
             margin-top: 0.75rem;
@@ -452,9 +452,9 @@ cat << 'EOF' > "$LOGIN_VIEW"
             </a>
         </div>
 
-        <!-- Primary CTA Button (#0ac336 Verde de Ação) -->
+        <!-- Primary CTA Button (Azul Petróleo Oficial do i-Educar) -->
         <button id="form-login-submit" 
-                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-md bg-[#0ac336] hover:bg-[#08a82e] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#0ac336] focus:ring-offset-2" 
+                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-md bg-[#1b4c6b] hover:bg-[#143950] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#1b4c6b] focus:ring-offset-2" 
                 type="submit">
             <span>Acessar Plataforma</span>
             <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -576,7 +576,7 @@ cat << 'EOF' > "$EMAIL_PASS_VIEW"
 
         <!-- Botão CTA -->
         <button id="form-login-submit" 
-                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-md bg-[#0ac336] hover:bg-[#08a82e] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#0ac336] focus:ring-offset-2" 
+                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-md bg-[#1b4c6b] hover:bg-[#143950] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#1b4c6b] focus:ring-offset-2" 
                 type="submit">
             <span>Redefinir Senha</span>
             <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -687,7 +687,7 @@ cat << 'EOF' > "$RESET_PASS_VIEW"
 
         <!-- Botão CTA -->
         <button id="form-login-submit" 
-                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-md bg-[#0ac336] hover:bg-[#08a82e] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#0ac336] focus:ring-offset-2" 
+                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-md bg-[#1b4c6b] hover:bg-[#143950] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#1b4c6b] focus:ring-offset-2" 
                 type="submit">
             <span>Salvar Nova Senha</span>
             <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -796,7 +796,7 @@ if [[ -d "$(dirname "$CHANGE_PASS_VIEW")" || -f "$CHANGE_PASS_VIEW" ]]; then
 
         <!-- Botão CTA -->
         <button id="form-login-submit" 
-                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-md bg-[#0ac336] hover:bg-[#08a82e] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#0ac336] focus:ring-offset-2" 
+                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-md bg-[#1b4c6b] hover:bg-[#143950] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#1b4c6b] focus:ring-offset-2" 
                 type="submit">
             <span>Atualizar Senha</span>
             <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -827,7 +827,6 @@ echo -e "\n${GREEN}=============================================================
 echo -e "${GREEN}  ✓ TEMA MODERNO APLICADO COM AS CORES OFICIAIS DO I-EDUCAR!          ${NC}"
 echo -e "${GREEN}======================================================================${NC}"
 echo -e " • Paleta Primária:      ${CYAN}#1b4c6b (Azul Petróleo i-Educar)${NC}"
-echo -e " • Botão Acessar (CTA):  ${GREEN}#0ac336 (Verde Ação)${NC}"
 echo -e " • Paleta Secundária:    ${CYAN}#0066cc (Azul Cerúleo / Destaques)${NC}"
 echo -e " • Fundo Suave:          ${CYAN}#f0f4f8 (Gelo Intranet i-Educar)${NC}"
 echo -e " • Layout Base:          ${CYAN}${PUBLIC_LAYOUT}${NC}"
