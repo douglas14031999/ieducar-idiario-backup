@@ -188,7 +188,18 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
         #togglePasswordBtn svg {
             width: 1.125rem !important;
             height: 1.125rem !important;
-            display: block !important;
+        }
+        #togglePasswordBtn #eyeIcon {
+            display: inline-block !important;
+        }
+        #togglePasswordBtn #eyeOffIcon {
+            display: none !important;
+        }
+        #togglePasswordBtn.show-password #eyeIcon {
+            display: none !important;
+        }
+        #togglePasswordBtn.show-password #eyeOffIcon {
+            display: inline-block !important;
         }
         #togglePasswordBtn svg path,
         #togglePasswordBtn svg circle,
@@ -477,12 +488,12 @@ cat << 'EOF' > "$LOGIN_VIEW"
                         type="button"
                         style="background: transparent !important; border: none !important; outline: none !important; box-shadow: none !important;">
                     <!-- Ícone Olho Aberto -->
-                    <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="width: 1.15rem; height: 1.15rem; display: block;">
+                    <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="width: 1.15rem; height: 1.15rem; display: inline-block !important;">
                         <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" fill="none" style="fill: none !important; stroke: currentColor !important;"></path>
                         <circle cx="12" cy="12" r="3" fill="none" style="fill: none !important; stroke: currentColor !important;"></circle>
                     </svg>
                     <!-- Ícone Olho Fechado / Oculto -->
-                    <svg id="eyeOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 hidden" style="width: 1.15rem; height: 1.15rem; display: none;">
+                    <svg id="eyeOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="width: 1.15rem; height: 1.15rem; display: none !important;">
                         <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" fill="none" style="fill: none !important; stroke: currentColor !important;"></path>
                         <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" fill="none" style="fill: none !important; stroke: currentColor !important;"></path>
                         <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" fill="none" style="fill: none !important; stroke: currentColor !important;"></path>
@@ -534,14 +545,16 @@ cat << 'EOF' > "$LOGIN_VIEW"
             if (togglePasswordBtn && passwordInput && eyeIcon && eyeOffIcon) {
                 togglePasswordBtn.addEventListener('click', function () {
                     var isPassword = passwordInput.getAttribute('type') === 'password';
-                    passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
-                    
                     if (isPassword) {
-                        eyeIcon.style.display = 'none';
-                        eyeOffIcon.style.display = 'block';
+                        passwordInput.setAttribute('type', 'text');
+                        togglePasswordBtn.classList.add('show-password');
+                        eyeIcon.style.setProperty('display', 'none', 'important');
+                        eyeOffIcon.style.setProperty('display', 'inline-block', 'important');
                     } else {
-                        eyeIcon.style.display = 'block';
-                        eyeOffIcon.style.display = 'none';
+                        passwordInput.setAttribute('type', 'password');
+                        togglePasswordBtn.classList.remove('show-password');
+                        eyeIcon.style.setProperty('display', 'inline-block', 'important');
+                        eyeOffIcon.style.setProperty('display', 'none', 'important');
                     }
                 });
             }
