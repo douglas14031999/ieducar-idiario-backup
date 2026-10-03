@@ -26,7 +26,7 @@ echo -e "${CYAN}================================================================
 echo -e "${CYAN}   🎨  TEMA MODERNO DE LOGIN & SENHAS - I-EDUCAR (CANOA 2026)         ${NC}"
 echo -e "${CYAN}======================================================================${NC}"
 echo -e "Aplicando design com Glassmorphism, ondas orgânicas, paleta oficial"
-echo -e "em todas as telas públicas (Login, Redefinição e Troca de Senha)."
+echo -e "e espaçamento perfeito para placeholders e ícones."
 echo -e "${CYAN}----------------------------------------------------------------------${NC}\n"
 
 # 1. Checagem de privilégios de root
@@ -153,7 +153,17 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
             box-shadow: 0 6px 24px rgba(19, 94, 70, 0.42);
         }
 
-        /* Estilização de contingência para qualquer elemento legado dentro de #login-form */
+        /* Regras específicas e seguras para espaçamento de ícones e placeholders */
+        .has-left-icon {
+            padding-left: 2.75rem !important;
+            padding-right: 0.875rem !important;
+        }
+        .has-both-icons {
+            padding-left: 2.75rem !important;
+            padding-right: 2.75rem !important;
+        }
+
+        /* Estilização de contingência APENAS para elementos legados sem classes */
         #login-form h2 {
             font-size: 1.25rem;
             font-weight: 700;
@@ -175,8 +185,8 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
             margin-bottom: 0.25rem;
             margin-top: 0.75rem;
         }
-        #login-form input[type="text"],
-        #login-form input[type="password"] {
+        #login-form input[type="text"]:not(.has-left-icon),
+        #login-form input[type="password"]:not(.has-both-icons):not(.has-left-icon) {
             display: block;
             width: 100%;
             padding: 0.625rem 0.875rem;
@@ -381,12 +391,13 @@ cat << 'EOF' > "$LOGIN_VIEW"
                 Matrícula institucional
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
-                <input class="block w-full pl-9 pr-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none font-normal" 
+                <input class="has-left-icon block w-full py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none font-normal" 
+                       style="padding-left: 2.75rem !important; padding-right: 0.875rem !important;"
                        id="login" 
                        name="login" 
                        value="{{ old('login') }}" 
@@ -403,19 +414,20 @@ cat << 'EOF' > "$LOGIN_VIEW"
                 Senha de acesso
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
-                <input class="block w-full pl-9 pr-10 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none" 
+                <input class="has-both-icons block w-full py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none" 
+                       style="padding-left: 2.75rem !important; padding-right: 2.75rem !important;"
                        id="password" 
                        name="password" 
                        placeholder="••••••••" 
                        required 
                        type="password">
                 <button aria-label="Alternar visibilidade da senha" 
-                        class="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600 transition focus:outline-none" 
+                        class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition focus:outline-none z-10" 
                         id="togglePasswordBtn" 
                         type="button">
                     <svg class="h-4 w-4" fill="none" id="eyeIcon" stroke="currentColor" viewBox="0 0 24 24">
@@ -542,12 +554,13 @@ cat << 'EOF' > "$EMAIL_PASS_VIEW"
                 Matrícula institucional
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
-                <input class="block w-full pl-9 pr-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none font-normal" 
+                <input class="has-left-icon block w-full py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none font-normal" 
+                       style="padding-left: 2.75rem !important; padding-right: 0.875rem !important;"
                        id="login" 
                        name="login" 
                        value="{{ old('login') }}" 
@@ -611,12 +624,13 @@ cat << 'EOF' > "$RESET_PASS_VIEW"
                 Matrícula institucional
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
-                <input class="block w-full pl-9 pr-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none font-normal" 
+                <input class="has-left-icon block w-full py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none font-normal" 
+                       style="padding-left: 2.75rem !important; padding-right: 0.875rem !important;"
                        id="login" 
                        name="login" 
                        value="{{ old('login') }}" 
@@ -632,12 +646,13 @@ cat << 'EOF' > "$RESET_PASS_VIEW"
                 Nova senha
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
-                <input class="block w-full pl-9 pr-10 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none" 
+                <input class="has-left-icon block w-full py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none" 
+                       style="padding-left: 2.75rem !important; padding-right: 0.875rem !important;"
                        id="password" 
                        name="password" 
                        placeholder="••••••••" 
@@ -652,12 +667,13 @@ cat << 'EOF' > "$RESET_PASS_VIEW"
                 Confirme a nova senha
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
-                <input class="block w-full pl-9 pr-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none" 
+                <input class="has-left-icon block w-full py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none" 
+                       style="padding-left: 2.75rem !important; padding-right: 0.875rem !important;"
                        id="password-confirm" 
                        name="password_confirmation" 
                        placeholder="••••••••" 
@@ -717,12 +733,13 @@ if [[ -d "$(dirname "$CHANGE_PASS_VIEW")" || -f "$CHANGE_PASS_VIEW" ]]; then
                 Matrícula institucional
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
-                <input class="block w-full pl-9 pr-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none font-normal" 
+                <input class="has-left-icon block w-full py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none font-normal" 
+                       style="padding-left: 2.75rem !important; padding-right: 0.875rem !important;"
                        id="login" 
                        name="login" 
                        value="{{ old('login') }}" 
@@ -738,12 +755,13 @@ if [[ -d "$(dirname "$CHANGE_PASS_VIEW")" || -f "$CHANGE_PASS_VIEW" ]]; then
                 Nova senha
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
-                <input class="block w-full pl-9 pr-10 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none" 
+                <input class="has-left-icon block w-full py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none" 
+                       style="padding-left: 2.75rem !important; padding-right: 0.875rem !important;"
                        id="password" 
                        name="password" 
                        placeholder="••••••••" 
@@ -758,12 +776,13 @@ if [[ -d "$(dirname "$CHANGE_PASS_VIEW")" || -f "$CHANGE_PASS_VIEW" ]]; then
                 Confirme a nova senha
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
-                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400">
+                <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
                     <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
-                <input class="block w-full pl-9 pr-3.5 py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none" 
+                <input class="has-left-icon block w-full py-2.5 text-xs text-slate-900 placeholder-slate-400 bg-transparent border-0 rounded-xl focus:ring-0 focus:outline-none" 
+                       style="padding-left: 2.75rem !important; padding-right: 0.875rem !important;"
                        id="password-confirm" 
                        name="password_confirmation" 
                        placeholder="••••••••" 
@@ -810,5 +829,6 @@ echo -e " • Redefinição de Senha: ${CYAN}${EMAIL_PASS_VIEW}${NC}"
 echo -e " • Nova Senha com Token: ${CYAN}${RESET_PASS_VIEW}${NC}"
 echo -e " • Troca de Senha:       ${CYAN}${CHANGE_PASS_VIEW}${NC}"
 echo -e " • Estilo:               ${GREEN}Glassmorphism + Ondas Orgânicas Canoa 2026${NC}"
+echo -e " • Espaçamento:          ${GREEN}Placeholders perfeitamente afastados dos ícones (2.75rem)${NC}"
 echo -e " • Autenticação:         ${GREEN}100% preservada (Asset::get('login'), tokens e CSRF)${NC}"
 echo -e "${GREEN}======================================================================${NC}\n"
