@@ -156,6 +156,48 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
             box-shadow: 0 6px 24px rgba(27, 76, 107, 0.44);
         }
 
+        /* Desabilita os botões nativos de revelar senha do Microsoft Edge / Chrome / WebKit */
+        input::-ms-reveal,
+        input::-ms-clear {
+            display: none !important;
+            width: 0 !important;
+            height: 0 !important;
+        }
+        input::-webkit-credentials-auto-fill-button,
+        input::-webkit-contacts-auto-fill-button {
+            display: none !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+
+        /* Botão para alternar visibilidade da senha limpo e sem bordas/fundo */
+        #togglePasswordBtn {
+            background: transparent !important;
+            background-color: transparent !important;
+            border: none !important;
+            outline: none !important;
+            box-shadow: none !important;
+            padding: 0 !important;
+            margin: 0 !important;
+            cursor: pointer !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+            line-height: 1 !important;
+        }
+        #togglePasswordBtn svg {
+            width: 1.125rem !important;
+            height: 1.125rem !important;
+            display: block !important;
+        }
+        #togglePasswordBtn svg path,
+        #togglePasswordBtn svg circle,
+        #togglePasswordBtn svg line {
+            fill: none !important;
+            stroke: currentColor !important;
+            stroke-width: 1.8 !important;
+        }
+
         /* Regras seguras para espaçamento de ícones e placeholders */
         .has-left-icon {
             padding-left: 2.75rem !important;
@@ -430,15 +472,21 @@ cat << 'EOF' > "$LOGIN_VIEW"
                        required 
                        type="password">
                 <button aria-label="Alternar visibilidade da senha" 
-                        class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-[#1b4c6b] transition focus:outline-none z-10" 
+                        class="absolute inset-y-0 right-0 pr-3.5 flex items-center justify-center text-slate-400 hover:text-[#1b4c6b] transition focus:outline-none z-10" 
                         id="togglePasswordBtn" 
-                        type="button">
-                    <svg class="h-4 w-4 fill="none" id="eyeIcon" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
-                        <path d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                        type="button"
+                        style="background: transparent !important; border: none !important; outline: none !important; box-shadow: none !important;">
+                    <!-- Ícone Olho Aberto -->
+                    <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4" style="width: 1.15rem; height: 1.15rem; display: block;">
+                        <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z" fill="none" style="fill: none !important; stroke: currentColor !important;"></path>
+                        <circle cx="12" cy="12" r="3" fill="none" style="fill: none !important; stroke: currentColor !important;"></circle>
                     </svg>
-                    <svg class="h-4 w-4 hidden" fill="none" id="eyeOffIcon" stroke="currentColor" viewBox="0 0 24 24">
-                        <path d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l18 18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
+                    <!-- Ícone Olho Fechado / Oculto -->
+                    <svg id="eyeOffIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4 hidden" style="width: 1.15rem; height: 1.15rem; display: none;">
+                        <path d="M9.88 9.88a3 3 0 1 0 4.24 4.24" fill="none" style="fill: none !important; stroke: currentColor !important;"></path>
+                        <path d="M10.73 5.08A10.43 10.43 0 0 1 12 5c7 0 10 7 10 7a13.16 13.16 0 0 1-1.67 2.68" fill="none" style="fill: none !important; stroke: currentColor !important;"></path>
+                        <path d="M6.61 6.61A13.526 13.526 0 0 0 2 12s3 7 10 7a9.74 9.74 0 0 0 5.39-1.61" fill="none" style="fill: none !important; stroke: currentColor !important;"></path>
+                        <line x1="2" x2="22" y1="2" y2="22" style="stroke: currentColor !important;"></line>
                     </svg>
                 </button>
             </div>
@@ -483,17 +531,17 @@ cat << 'EOF' > "$LOGIN_VIEW"
             var eyeIcon = document.getElementById('eyeIcon');
             var eyeOffIcon = document.getElementById('eyeOffIcon');
 
-            if (togglePasswordBtn && passwordInput) {
+            if (togglePasswordBtn && passwordInput && eyeIcon && eyeOffIcon) {
                 togglePasswordBtn.addEventListener('click', function () {
                     var isPassword = passwordInput.getAttribute('type') === 'password';
                     passwordInput.setAttribute('type', isPassword ? 'text' : 'password');
                     
                     if (isPassword) {
-                        eyeIcon.classList.add('hidden');
-                        eyeOffIcon.classList.remove('hidden');
+                        eyeIcon.style.display = 'none';
+                        eyeOffIcon.style.display = 'block';
                     } else {
-                        eyeIcon.classList.remove('hidden');
-                        eyeOffIcon.classList.add('hidden');
+                        eyeIcon.style.display = 'block';
+                        eyeOffIcon.style.display = 'none';
                     }
                 });
             }
