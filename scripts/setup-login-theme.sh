@@ -1,8 +1,9 @@
 #!/usr/bin/env bash
 # ==============================================================================
 # Script: setup-login-theme.sh
-# Objetivo: Aplicar o design moderno Glassmorphism (Sistema Canoa 2026 / Lagoa da Canoa)
-#           em TODAS as telas públicas do i-Educar:
+# Objetivo: Aplicar o design moderno Glassmorphism com a identidade visual e
+#           as CORES BASE OFICIAIS DO I-EDUCAR (#1b4c6b / Azul Petróleo e #0066cc)
+#           em TODAS as telas públicas:
 #           - Login (auth/login.blade.php)
 #           - Recuperação / Redefinição de Senha (auth/passwords/email.blade.php)
 #           - Redefinição de Senha com Token (auth/passwords/reset.blade.php)
@@ -23,9 +24,9 @@ BOLD='\033[1m'
 NC='\033[0m'
 
 echo -e "${CYAN}======================================================================${NC}"
-echo -e "${CYAN}   🎨  TEMA MODERNO DE LOGIN & SENHAS - I-EDUCAR (CANOA 2026)         ${NC}"
+echo -e "${CYAN}   🎨  TEMA MODERNO - CORES BASE OFICIAIS DO I-EDUCAR (#1b4c6b)       ${NC}"
 echo -e "${CYAN}======================================================================${NC}"
-echo -e "Aplicando design com Glassmorphism, ondas orgânicas, paleta oficial"
+echo -e "Aplicando design com Glassmorphism, ondas orgânicas na paleta do i-Educar"
 echo -e "e espaçamento perfeito para placeholders e ícones."
 echo -e "${CYAN}----------------------------------------------------------------------${NC}\n"
 
@@ -110,18 +111,20 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Public+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!-- Tailwind Configuration -->
+    <!-- Tailwind Configuration com as Cores Base Oficiais do i-Educar -->
     <script>
         tailwind.config = {
             theme: {
                 extend: {
                     colors: {
-                        canoa: {
-                            green: '#135e46',
-                            greenHover: '#0e4936',
-                            orange: '#f37023',
-                            pink: '#e52565',
-                            softBg: '#f7faf8'
+                        ieducar: {
+                            DEFAULT: '#1b4c6b',
+                            dark: '#143950',
+                            light: '#246187',
+                            accent: '#0066cc',
+                            accentHover: '#0052a3',
+                            green: '#00a65a',
+                            softBg: '#f0f4f8'
                         }
                     },
                     fontFamily: {
@@ -134,26 +137,26 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
 
     <style>
         .glass-card {
-            background: rgba(255, 255, 255, 0.82);
+            background: rgba(255, 255, 255, 0.88);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.85);
-            box-shadow: 0 20px 45px -10px rgba(19, 94, 70, 0.12),
+            border: 1px solid rgba(255, 255, 255, 0.9);
+            box-shadow: 0 20px 45px -10px rgba(27, 76, 107, 0.15),
                         0 8px 20px -6px rgba(0, 0, 0, 0.05),
                         inset 0 1px 0 0 rgba(255, 255, 255, 0.95);
         }
         .input-focus-ring:focus-within {
-            border-color: #135e46;
-            box-shadow: 0 0 0 3px rgba(19, 94, 70, 0.12);
+            border-color: #1b4c6b;
+            box-shadow: 0 0 0 3px rgba(27, 76, 107, 0.14);
         }
         .btn-glow {
-            box-shadow: 0 4px 18px rgba(19, 94, 70, 0.32);
+            box-shadow: 0 4px 18px rgba(27, 76, 107, 0.32);
         }
         .btn-glow:hover {
-            box-shadow: 0 6px 24px rgba(19, 94, 70, 0.42);
+            box-shadow: 0 6px 24px rgba(27, 76, 107, 0.44);
         }
 
-        /* Regras específicas e seguras para espaçamento de ícones e placeholders */
+        /* Regras seguras para espaçamento de ícones e placeholders */
         .has-left-icon {
             padding-left: 2.75rem !important;
             padding-right: 0.875rem !important;
@@ -163,12 +166,12 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
             padding-right: 2.75rem !important;
         }
 
-        /* Estilização de contingência APENAS para elementos legados sem classes */
+        /* Estilização de contingência para qualquer formulário legado sem classes */
         #login-form h2 {
             font-size: 1.25rem;
             font-weight: 700;
             text-align: center;
-            color: #0f172a;
+            color: #1b4c6b;
             margin-bottom: 0.5rem;
         }
         #login-form p {
@@ -201,8 +204,8 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
         }
         #login-form input[type="text"]:focus,
         #login-form input[type="password"]:focus {
-            border-color: #135e46;
-            box-shadow: 0 0 0 3px rgba(19, 94, 70, 0.12);
+            border-color: #1b4c6b;
+            box-shadow: 0 0 0 3px rgba(27, 76, 107, 0.14);
         }
         #login-form button.submit,
         #login-form button[type="submit"] {
@@ -214,16 +217,16 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
             font-weight: 600;
             letter-spacing: 0.025em;
             border-radius: 0.75rem;
-            background-color: #135e46;
+            background-color: #1b4c6b;
             border: none;
             cursor: pointer;
-            box-shadow: 0 4px 18px rgba(19, 94, 70, 0.32);
+            box-shadow: 0 4px 18px rgba(27, 76, 107, 0.32);
             transition: all 0.15s ease-in-out;
         }
         #login-form button.submit:hover,
         #login-form button[type="submit"]:hover {
-            background-color: #0e4936;
-            box-shadow: 0 6px 24px rgba(19, 94, 70, 0.42);
+            background-color: #143950;
+            box-shadow: 0 6px 24px rgba(27, 76, 107, 0.44);
         }
         #login-form .remember {
             margin-top: 0.75rem;
@@ -231,14 +234,14 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
             font-size: 0.75rem;
         }
         #login-form .remember a {
-            color: #135e46;
+            color: #1b4c6b;
             font-weight: 600;
             font-size: 0.75rem;
             text-decoration: none;
         }
         #login-form .remember a:hover {
             text-decoration: underline;
-            color: #0e4936;
+            color: #0066cc;
         }
     </style>
 
@@ -277,7 +280,7 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
     @endif
 </head>
 
-<body class="min-h-screen w-screen overflow-x-hidden bg-[#f7faf8] font-sans text-slate-800 flex flex-col justify-between selection:bg-[#135e46] selection:text-white relative select-none">
+<body class="min-h-screen w-screen overflow-x-hidden bg-[#f0f4f8] font-sans text-slate-800 flex flex-col justify-between selection:bg-[#1b4c6b] selection:text-white relative select-none">
 
 @if(config('legacy.gtm'))
 <!-- Google Tag Manager (noscript) -->
@@ -287,36 +290,36 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
 <!-- End Google Tag Manager (noscript) -->
 @endif
 
-<!-- BACKGROUND: Dynamic multi-layered organic waves & soft gradients using exact Lagoa da Canoa palette -->
+<!-- BACKGROUND: Ondas e gradientes orgânicos na paleta oficial do i-Educar -->
 <div class="fixed inset-0 pointer-events-none overflow-hidden z-0">
-    <div class="absolute inset-0 bg-gradient-to-tr from-[#f0f6f3] via-[#f7faf8] to-[#fff6f0]"></div>
-    <!-- Organic glowing color nodes -->
-    <div class="absolute -top-36 -right-24 w-[520px] h-[520px] bg-[#f37023]/14 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute -bottom-32 -left-28 w-[580px] h-[580px] bg-[#135e46]/16 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute top-1/4 -left-36 w-96 h-96 bg-[#e52565]/10 rounded-full blur-3xl pointer-events-none"></div>
-    <div class="absolute bottom-1/4 right-0 w-80 h-80 bg-[#135e46]/10 rounded-full blur-3xl pointer-events-none"></div>
-    <!-- Fluid waves layer -->
+    <div class="absolute inset-0 bg-gradient-to-tr from-[#eaf1f7] via-[#f2f6fa] to-[#e8f0f8]"></div>
+    <!-- Nós de iluminação suave do i-Educar -->
+    <div class="absolute -top-36 -right-24 w-[520px] h-[520px] bg-[#1b4c6b]/14 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute -bottom-32 -left-28 w-[580px] h-[580px] bg-[#0066cc]/12 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute top-1/4 -left-36 w-96 h-96 bg-[#00a65a]/10 rounded-full blur-3xl pointer-events-none"></div>
+    <div class="absolute bottom-1/4 right-0 w-80 h-80 bg-[#f37023]/10 rounded-full blur-3xl pointer-events-none"></div>
+    <!-- Camada de Ondas Fluidas com tons azul petróleo e cerúleo do i-Educar -->
     <svg class="absolute bottom-0 left-0 right-0 w-full h-[48vh] min-h-[340px] pointer-events-none transform-gpu" fill="none" preserveAspectRatio="none" viewBox="0 0 1440 380">
-        <path d="M0,192L48,197.3C96,203,192,213,288,202.7C384,192,480,160,576,154.7C672,149,768,171,864,192C960,213,1056,235,1152,224C1248,213,1344,171,1392,149.3L1440,128L1440,380L1392,380C1344,380,1248,380,1152,380C1056,380,960,380,864,380C768,380,672,380,576,380C480,380,384,380,288,380C192,380,96,380,48,380L0,380Z" fill="#135e46" fill-opacity="0.065"></path>
-        <path d="M0,240L60,229.3C120,219,240,197,360,197.3C480,197,600,219,720,229.3C840,240,960,240,1080,224C1200,208,1320,176,1380,160L1440,144L1440,380L1380,380C1320,380,1200,380,1080,380C960,380,840,380,720,380C600,380,480,380,360,380C240,380,120,380,60,380L0,380Z" fill="#e52565" fill-opacity="0.04"></path>
-        <path d="M0,295L60,284C120,273,240,251,360,253C480,255,600,281,720,275C840,269,960,231,1080,225C1200,219,1320,245,1380,258L1440,270L1440,380L1380,380C1320,380,1200,380,1080,380C960,380,840,380,720,380C600,380,480,380,360,380C240,380,120,380,60,380L0,380Z" fill="#f37023" fill-opacity="0.055"></path>
+        <path d="M0,192L48,197.3C96,203,192,213,288,202.7C384,192,480,160,576,154.7C672,149,768,171,864,192C960,213,1056,235,1152,224C1248,213,1344,171,1392,149.3L1440,128L1440,380L1392,380C1344,380,1248,380,1152,380C1056,380,960,380,864,380C768,380,672,380,576,380C480,380,384,380,288,380C192,380,96,380,48,380L0,380Z" fill="#1b4c6b" fill-opacity="0.07"></path>
+        <path d="M0,240L60,229.3C120,219,240,197,360,197.3C480,197,600,219,720,229.3C840,240,960,240,1080,224C1200,208,1320,176,1380,160L1440,144L1440,380L1380,380C1320,380,1200,380,1080,380C960,380,840,380,720,380C600,380,480,380,360,380C240,380,120,380,60,380L0,380Z" fill="#0066cc" fill-opacity="0.05"></path>
+        <path d="M0,295L60,284C120,273,240,251,360,253C480,255,600,281,720,275C840,269,960,231,1080,225C1200,219,1320,245,1380,258L1440,270L1440,380L1380,380C1320,380,1200,380,1080,380C960,380,840,380,720,380C600,380,480,380,360,380C240,380,120,380,60,380L0,380Z" fill="#0284c7" fill-opacity="0.06"></path>
     </svg>
 </div>
 
-<!-- MAIN CONTENT: Centered 440px Glassmorphism Card -->
+<!-- CONTEÚDO PRINCIPAL: Card Centralizado Glassmorphism -->
 <main class="flex-1 flex items-center justify-center px-4 py-8 relative z-10" data-purpose="authentication-wrapper">
     <div class="w-full max-w-[440px] glass-card rounded-3xl p-7 sm:p-8 transition-all duration-300">
         <!-- Logo Header -->
         <div class="text-center mb-5">
             <div class="inline-flex items-center justify-center mb-3">
-                <div class="p-2 rounded-2xl bg-white/95 shadow-md shadow-slate-200/60 border border-slate-100/90 transition-transform duration-200 hover:scale-105">
-                    <img alt="{{ config('legacy.config.ieducar_entity_name') ?? 'Prefeitura de Lagoa da Canoa' }}" 
+                <div class="p-2.5 rounded-2xl bg-white shadow-md shadow-slate-200/70 border border-slate-100 transition-transform duration-200 hover:scale-105">
+                    <img alt="{{ config('legacy.config.ieducar_entity_name') ?? 'i-Educar' }}" 
                          class="w-16 h-16 object-contain" 
                          src="{{ config('legacy.config.ieducar_image') ?? 'https://lh3.googleusercontent.com/aida-public/AB6AXuCtHMCsnOnk4y_ENFnmgg-3jxDOy5007ftK0-mU0JM613vW_xkr6j_aIFJcb0syav3LMuaDhcgqa65z8851hlLfQcqPIB3wO5ye5MCtROuZeU3PvvdZNBPdv7EWzWpYUYM5CieFIDJzVe4hXel1d5jqfzLA6-g-k1GFHWm-WHPvZxb6au10FNLl0kIwHphWqiVRjT-Rs4ArAJPZetXw3BI8ffHa6jOs603AI7mr3T0GWu9b0PcjCisNTlAKkfwBEL0bI6M' }}">
                 </div>
             </div>
             @if(config('legacy.config.ieducar_entity_name'))
-                <p class="text-[11px] font-semibold text-slate-500 uppercase tracking-wider mb-0.5">
+                <p class="text-[11px] font-semibold text-[#1b4c6b] uppercase tracking-wider mb-0.5">
                     {{ config('legacy.config.ieducar_entity_name') }}
                 </p>
             @endif
@@ -342,10 +345,10 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
     </div>
 </main>
 
-<!-- FOOTER: Discreet legal and support links -->
+<!-- FOOTER: Rodapé discreto alinhado ao estilo do i-Educar -->
 <footer class="w-full px-6 py-3.5 flex flex-col sm:flex-row items-center justify-between text-[11px] text-slate-500 z-10 shrink-0 gap-2">
     <div>
-        © 2026 Secretaria Municipal de Educação de Lagoa da Canoa • Alagoas
+        © 2026 i-Educar • Sistema de Gestão Escolar
     </div>
     <div class="flex items-center gap-3">
         @if(config('legacy.config.ieducar_login_footer'))
@@ -363,7 +366,7 @@ cat << 'EOF' > "$PUBLIC_LAYOUT"
 </html>
 EOF
 
-echo -e "${GREEN}✓ Layout base (public.blade.php) atualizado com sucesso!${NC}"
+echo -e "${GREEN}✓ Layout base (public.blade.php) com cores do i-Educar atualizado!${NC}"
 
 # 5. Escrever a tela de login (auth/login.blade.php)
 echo -e "\n${YELLOW}[3/6] Escrevendo formulário de login (auth/login.blade.php)...${NC}"
@@ -374,12 +377,12 @@ cat << 'EOF' > "$LOGIN_VIEW"
 
 @section('content')
     <div class="text-center mb-5">
-        <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-snug">
+        <h1 class="text-xl font-bold tracking-tight text-[#1b4c6b] leading-snug">
             Acesse sua conta
         </h1>
         @if(config('legacy.config.url_cadastro_usuario'))
             <div class="text-xs text-slate-500 mt-1">
-                Não possui uma conta? <a target="_blank" href="{{ config('legacy.config.url_cadastro_usuario') }}" rel="noopener" class="font-semibold text-[#135e46] hover:text-[#0e4936] hover:underline">Crie sua conta agora</a>.
+                Não possui uma conta? <a target="_blank" href="{{ config('legacy.config.url_cadastro_usuario') }}" rel="noopener" class="font-semibold text-[#1b4c6b] hover:text-[#0066cc] hover:underline">Crie sua conta agora</a>.
             </div>
         @endif
     </div>
@@ -392,7 +395,7 @@ cat << 'EOF' > "$LOGIN_VIEW"
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-4 w-4 text-[#1b4c6b]/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
@@ -415,7 +418,7 @@ cat << 'EOF' > "$LOGIN_VIEW"
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-4 w-4 text-[#1b4c6b]/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
@@ -427,7 +430,7 @@ cat << 'EOF' > "$LOGIN_VIEW"
                        required 
                        type="password">
                 <button aria-label="Alternar visibilidade da senha" 
-                        class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-slate-600 transition focus:outline-none z-10" 
+                        class="absolute inset-y-0 right-0 pr-3.5 flex items-center text-slate-400 hover:text-[#1b4c6b] transition focus:outline-none z-10" 
                         id="togglePasswordBtn" 
                         type="button">
                     <svg class="h-4 w-4" fill="none" id="eyeIcon" stroke="currentColor" viewBox="0 0 24 24">
@@ -443,15 +446,15 @@ cat << 'EOF' > "$LOGIN_VIEW"
 
         <!-- Row: Esqueceu a senha? -->
         <div class="flex items-center justify-end pt-0.5 text-xs">
-            <a class="text-[11px] font-semibold text-[#135e46] hover:text-[#0e4936] hover:underline transition" 
+            <a class="text-[11px] font-semibold text-[#1b4c6b] hover:text-[#0066cc] hover:underline transition" 
                href="{{ route('password.request') }}">
                 Esqueceu a senha?
             </a>
         </div>
 
-        <!-- Primary CTA Button -->
+        <!-- Primary CTA Button (Azul Petróleo Oficial do i-Educar) -->
         <button id="form-login-submit" 
-                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-xl bg-[#135e46] hover:bg-[#0e4936] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#135e46] focus:ring-offset-2" 
+                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-xl bg-[#1b4c6b] hover:bg-[#143950] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#1b4c6b] focus:ring-offset-2" 
                 type="submit">
             <span>Acessar Plataforma</span>
             <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -463,7 +466,7 @@ cat << 'EOF' > "$LOGIN_VIEW"
         <div id="sso" class="mt-4 pt-4 border-t border-slate-200/80 relative text-center">
             <span class="absolute -top-2.5 px-3 bg-white/90 text-slate-400 text-[10px] font-semibold left-1/2 -translate-x-1/2 uppercase tracking-wider">ou</span>
             <a href="{{ route('socialite.redirect') }}?intended={{ session()->get('url.intended') }}" 
-               class="w-full py-2.5 px-4 text-white text-xs font-semibold rounded-xl bg-[#135e46] hover:bg-[#0e4936] transition flex items-center justify-center gap-2">
+               class="w-full py-2.5 px-4 text-white text-xs font-semibold rounded-xl bg-[#0066cc] hover:bg-[#0052a3] transition flex items-center justify-center gap-2">
                 {{ config('services.passport.label') }}
             </a>
         </div>
@@ -526,7 +529,7 @@ cat << 'EOF' > "$LOGIN_VIEW"
 @endsection
 EOF
 
-echo -e "${GREEN}✓ View de login (login.blade.php) atualizada!${NC}"
+echo -e "${GREEN}✓ View de login (login.blade.php) atualizada com cores do i-Educar!${NC}"
 
 # 6. Escrever a tela de solicitação de redefinição de senha (auth/passwords/email.blade.php)
 echo -e "\n${YELLOW}[4/6] Escrevendo tela de recuperação de senha (auth/passwords/email.blade.php)...${NC}"
@@ -537,7 +540,7 @@ cat << 'EOF' > "$EMAIL_PASS_VIEW"
 
 @section('content')
     <div class="text-center mb-5">
-        <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-snug">
+        <h1 class="text-xl font-bold tracking-tight text-[#1b4c6b] leading-snug">
             Recuperação de acesso
         </h1>
         <p class="text-xs text-slate-500 mt-1">
@@ -555,7 +558,7 @@ cat << 'EOF' > "$EMAIL_PASS_VIEW"
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-4 w-4 text-[#1b4c6b]/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
@@ -573,7 +576,7 @@ cat << 'EOF' > "$EMAIL_PASS_VIEW"
 
         <!-- Botão CTA -->
         <button id="form-login-submit" 
-                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-xl bg-[#135e46] hover:bg-[#0e4936] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#135e46] focus:ring-offset-2" 
+                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-xl bg-[#1b4c6b] hover:bg-[#143950] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#1b4c6b] focus:ring-offset-2" 
                 type="submit">
             <span>Redefinir Senha</span>
             <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -584,7 +587,7 @@ cat << 'EOF' > "$EMAIL_PASS_VIEW"
         <!-- Link Voltar -->
         <div class="pt-2 text-center">
             <a href="{{ Asset::get('login') }}" 
-               class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#135e46] hover:text-[#0e4936] hover:underline transition">
+               class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1b4c6b] hover:text-[#0066cc] hover:underline transition">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                 </svg>
@@ -606,7 +609,7 @@ cat << 'EOF' > "$RESET_PASS_VIEW"
 
 @section('content')
     <div class="text-center mb-5">
-        <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-snug">
+        <h1 class="text-xl font-bold tracking-tight text-[#1b4c6b] leading-snug">
             Criar nova senha
         </h1>
         <p class="text-xs text-slate-500 mt-1">
@@ -625,7 +628,7 @@ cat << 'EOF' > "$RESET_PASS_VIEW"
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-4 w-4 text-[#1b4c6b]/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
@@ -647,7 +650,7 @@ cat << 'EOF' > "$RESET_PASS_VIEW"
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-4 w-4 text-[#1b4c6b]/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
@@ -668,7 +671,7 @@ cat << 'EOF' > "$RESET_PASS_VIEW"
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-4 w-4 text-[#1b4c6b]/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
@@ -684,7 +687,7 @@ cat << 'EOF' > "$RESET_PASS_VIEW"
 
         <!-- Botão CTA -->
         <button id="form-login-submit" 
-                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-xl bg-[#135e46] hover:bg-[#0e4936] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#135e46] focus:ring-offset-2" 
+                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-xl bg-[#1b4c6b] hover:bg-[#143950] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#1b4c6b] focus:ring-offset-2" 
                 type="submit">
             <span>Salvar Nova Senha</span>
             <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -695,7 +698,7 @@ cat << 'EOF' > "$RESET_PASS_VIEW"
         <!-- Link Voltar -->
         <div class="pt-2 text-center">
             <a href="{{ route('login') }}" 
-               class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#135e46] hover:text-[#0e4936] hover:underline transition">
+               class="inline-flex items-center gap-1.5 text-xs font-semibold text-[#1b4c6b] hover:text-[#0066cc] hover:underline transition">
                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path d="M10 19l-7-7m0 0l7-7m-7 7h18" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                 </svg>
@@ -716,7 +719,7 @@ if [[ -d "$(dirname "$CHANGE_PASS_VIEW")" || -f "$CHANGE_PASS_VIEW" ]]; then
 
 @section('content')
     <div class="text-center mb-5">
-        <h1 class="text-xl font-bold tracking-tight text-slate-900 leading-snug">
+        <h1 class="text-xl font-bold tracking-tight text-[#1b4c6b] leading-snug">
             Alteração de senha
         </h1>
         <p class="text-xs text-slate-500 mt-1">
@@ -734,7 +737,7 @@ if [[ -d "$(dirname "$CHANGE_PASS_VIEW")" || -f "$CHANGE_PASS_VIEW" ]]; then
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-4 w-4 text-[#1b4c6b]/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
@@ -756,7 +759,7 @@ if [[ -d "$(dirname "$CHANGE_PASS_VIEW")" || -f "$CHANGE_PASS_VIEW" ]]; then
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-4 w-4 text-[#1b4c6b]/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
@@ -777,7 +780,7 @@ if [[ -d "$(dirname "$CHANGE_PASS_VIEW")" || -f "$CHANGE_PASS_VIEW" ]]; then
             </label>
             <div class="relative rounded-xl border border-slate-300/80 bg-white/95 transition input-focus-ring shadow-xs">
                 <div class="absolute inset-y-0 left-0 pl-3.5 flex items-center pointer-events-none text-slate-400 z-10">
-                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-4 w-4 text-[#1b4c6b]/70" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke-linecap="round" stroke-linejoin="round" stroke-width="2"></path>
                     </svg>
                 </div>
@@ -793,7 +796,7 @@ if [[ -d "$(dirname "$CHANGE_PASS_VIEW")" || -f "$CHANGE_PASS_VIEW" ]]; then
 
         <!-- Botão CTA -->
         <button id="form-login-submit" 
-                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-xl bg-[#135e46] hover:bg-[#0e4936] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#135e46] focus:ring-offset-2" 
+                class="w-full mt-2 py-3 px-4 text-white font-semibold text-xs tracking-wide rounded-xl bg-[#1b4c6b] hover:bg-[#143950] btn-glow transition duration-150 flex items-center justify-center gap-2 group focus:outline-none focus:ring-2 focus:ring-[#1b4c6b] focus:ring-offset-2" 
                 type="submit">
             <span>Atualizar Senha</span>
             <svg class="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -821,14 +824,16 @@ php artisan view:clear || true
 php artisan optimize:clear 2>/dev/null || true
 
 echo -e "\n${GREEN}======================================================================${NC}"
-echo -e "${GREEN}  ✓ TEMA MODERNO APLICADO EM TODAS AS TELAS PÚBLICAS COM SUCESSO!     ${NC}"
+echo -e "${GREEN}  ✓ TEMA MODERNO APLICADO COM AS CORES OFICIAIS DO I-EDUCAR!          ${NC}"
 echo -e "${GREEN}======================================================================${NC}"
+echo -e " • Paleta Primária:      ${CYAN}#1b4c6b (Azul Petróleo i-Educar)${NC}"
+echo -e " • Paleta Secundária:    ${CYAN}#0066cc (Azul Cerúleo / Destaques)${NC}"
+echo -e " • Fundo Suave:          ${CYAN}#f0f4f8 (Gelo Intranet i-Educar)${NC}"
 echo -e " • Layout Base:          ${CYAN}${PUBLIC_LAYOUT}${NC}"
 echo -e " • Login:                ${CYAN}${LOGIN_VIEW}${NC}"
 echo -e " • Redefinição de Senha: ${CYAN}${EMAIL_PASS_VIEW}${NC}"
 echo -e " • Nova Senha com Token: ${CYAN}${RESET_PASS_VIEW}${NC}"
 echo -e " • Troca de Senha:       ${CYAN}${CHANGE_PASS_VIEW}${NC}"
-echo -e " • Estilo:               ${GREEN}Glassmorphism + Ondas Orgânicas Canoa 2026${NC}"
 echo -e " • Espaçamento:          ${GREEN}Placeholders perfeitamente afastados dos ícones (2.75rem)${NC}"
 echo -e " • Autenticação:         ${GREEN}100% preservada (Asset::get('login'), tokens e CSRF)${NC}"
 echo -e "${GREEN}======================================================================${NC}\n"
