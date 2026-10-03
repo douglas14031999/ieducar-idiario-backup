@@ -12,23 +12,23 @@ Para acessar o painel de ferramentas completo na sua VPS com apenas um comando, 
 curl -fsSL https://raw.githubusercontent.com/douglas14031999/ieducar-idiario-backup/main/install.sh | bash
 ```
 
-Ao executar, o script abre uma **Central Interativa** no terminal, permitindo escolher facilmente o que deseja configurar:
-- `[1]` 🚀 **Instalar i-Educar Completo** (Core + Relatórios, Biblioteca, Censo, PMD)
-- `[2]` 📓 **Instalar i-Diário Completo** (Ruby 2.6, PostgreSQL, Sidekiq, Systemd)
-- `[3]` 🛡️ **Configurar Backups Automáticos** (MinIO, Cron 23:59, Retenção)
-- `[4]` 🧬 **Popular Banco de Dados** (24 Seeders essenciais do Educacenso)
-- `[5]` 🎨 **Configurar Tela de Atalhos Rápidos** (Dashboard moderno no i-Educar)
-- `[6]` ⚡ **Configurar / Otimizar Memória SWAP** (4GB + swappiness=10)
-- `[7]` 🗺️ **Migrar PMD para Leaflet/OpenStreetMap** (Pré-Matrícula Digital)
-- `[8]` 👤 **Corrigir Foto de Perfil & Menu no i-Diário**
-- `[9]` 📑 **Instalar Diário de Classe Escolar Unificado** (i-Diário)
-- `[10]` 🎯 **Instalar Gabarito OMR & Elaborador de Provas** (FastAPI, OpenCV)
-- `[11]` 🔒 **Configurar Domínios & SSL HTTPS** (i-Educar & i-Diário)
-- `[12]` 📦 **Instalar / Atualizar Pacote Educacenso** (Censos 2024, 2025 e 2026 - Douglas)
-- `[13]` 🛠️ **Corrigir Ativos HTTPS / CSS Sem Estilo no i-Educar**
-- `[14]` 🖼️ **Aplicar Tema Moderno de Login** (Sistema Canoa 2026)
-- `[15]` 🔄 **Restaurar um Backup do MinIO** (Assistente de Restauração)
-- `[16]` 💾 **Executar Backup Manual Completo Agora**
+Ao executar, o script abre uma **Central Interativa** no terminal, permitindo escolher facilmente a operação desejada:
+- `[1]` 🚀 **Instalar i-Educar**
+- `[2]` 📓 **Instalar i-Diário**
+- `[3]` 🛡️ **Configurar Backups Automáticos**
+- `[4]` 🧬 **Popular Banco de Dados (Seeders)**
+- `[5]` 🎨 **Configurar Atalhos Rápidos**
+- `[6]` ⚡ **Configurar Memória SWAP**
+- `[7]` 🗺️ **Migrar Mapas PMD (OpenStreetMap)**
+- `[8]` 👤 **Corrigir Perfil & Menu (i-Diário)**
+- `[9]` 📑 **Instalar Diário de Classe Unificado**
+- `[10]` 🎯 **Instalar Gabarito OMR de Provas**
+- `[11]` 🔒 **Configurar Domínios & SSL HTTPS**
+- `[12]` 📦 **Instalar / Atualizar Educacenso**
+- `[13]` 🛠️ **Corrigir Ativos HTTPS / CSS**
+- `[14]` 🖼️ **Tema Moderno de Login**
+- `[15]` 🔄 **Restaurar Backup do MinIO**
+- `[16]` 💾 **Executar Backup Manual Agora**
 - `[0]` 🚪 **Sair**
 
 > 💡 *Após cada ação concluída, o script retorna automaticamente à tela inicial para que você possa efetuar outras operações sem precisar reiniciá-lo.*
