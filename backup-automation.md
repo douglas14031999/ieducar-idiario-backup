@@ -37,3 +37,8 @@
 - [x] **Tarefa 7.1:** Adicionar scripts locais para correção unaccent/notificações (`scripts/fix-search-and-notifications.sh`), reparo geral de 136 relatórios (`scripts/fix-reports-all.sh`), instalador do pacote de relatórios (`scripts/install-reports-package.sh`) e redesign de autenticação do i-Diário (`scripts/setup-idiario-login-theme.sh`).
 - [x] **Tarefa 7.2:** Integrar novas opções `[17]` a `[20]`, atalhos de terminal globais em `/usr/local/bin/` e flags CLI no `install.sh`.
 - [x] **Tarefa 7.3:** Atualizar `README.md` com tabela de comandos curl diretos e novos atalhos globais.
+
+### Fase 8: Povoamento Completo Censo 2026 (30 Seeders)
+- [x] **Tarefa 8.1:** Criar `scripts/seed-database-2026.sh` com 30 seeders atualizados (correção de Visão Monocular, recursos de prova INEP, turnos de turmas, cargos de gestão, localização diferenciada e formação continuada de docentes).
+- [x] **Tarefa 8.2:** Integrar opção atualizada no `install.sh` com atalho global `/usr/local/bin/ieducar-seed-2026` e flag CLI `--seed-2026`.
+- [x] **Tarefa 8.3:** Atualizar documentação e estrutura de arquivos no `README.md`.

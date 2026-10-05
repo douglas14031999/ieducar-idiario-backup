@@ -16,7 +16,7 @@ Ao executar, o script abre uma **Central Interativa** no terminal, permitindo es
 - `[1]` 🚀 **Instalar i-Educar**
 - `[2]` 📓 **Instalar i-Diário**
 - `[3]` 🛡️ **Configurar Backups Automáticos**
-- `[4]` 🧬 **Popular Banco de Dados (Seeders)**
+- `[4]` 🧬 **Popular Banco de Dados (30 Seeders Censo 2026)**
 - `[5]` 🎨 **Configurar Atalhos Rápidos**
 - `[6]` ⚡ **Configurar Memória SWAP**
 - `[7]` 🗺️ **Migrar Mapas PMD (OpenStreetMap)**
@@ -118,7 +118,8 @@ cd /opt/ieducar-backup && git pull origin main
 │   ├── backup.sh               # Script principal executado pelo cron (dumps, sync e MinIO)
 │   ├── restore.sh              # Utilitário interativo de restauração
 │   ├── setup-dashboard.sh      # Configurador automático da tela de atalhos rápidos do i-Educar
-│   ├── seed-database.sh        # Povoamento inicial automatizado do banco de dados (24 seeders)
+│   ├── seed-database-2026.sh   # Povoamento completo atualizado para o Censo 2026 (30 seeders)
+│   ├── seed-database.sh        # Povoamento inicial básico do banco de dados (24 seeders)
 │   ├── setup-swap.sh           # Configurador e otimizador de memória SWAP (4GB + swappiness)
 │   ├── setup-pmd-leaflet.sh    # Migração do Google Maps para Leaflet + OpenStreetMap (PMD)
 │   ├── setup-idiario-profile.sh # Correção de foto de perfil, cropper e menu no i-Diário

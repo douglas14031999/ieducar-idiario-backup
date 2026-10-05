@@ -119,6 +119,7 @@ bootstrap_environment() {
     ln -sf "${INSTALL_DIR}/scripts/restore.sh" /usr/local/bin/ieducar-restore
     ln -sf "${INSTALL_DIR}/scripts/setup-dashboard.sh" /usr/local/bin/ieducar-dashboard
     ln -sf "${INSTALL_DIR}/scripts/seed-database.sh" /usr/local/bin/ieducar-seed
+    ln -sf "${INSTALL_DIR}/scripts/seed-database-2026.sh" /usr/local/bin/ieducar-seed-2026
     ln -sf "${INSTALL_DIR}/scripts/setup-swap.sh" /usr/local/bin/ieducar-swap
     ln -sf "${INSTALL_DIR}/scripts/setup-pmd-leaflet.sh" /usr/local/bin/ieducar-pmd
     ln -sf "${INSTALL_DIR}/scripts/setup-idiario-profile.sh" /usr/local/bin/idiario-perfil
@@ -254,16 +255,24 @@ EOF
     fi
 }
 
-# Ação 2: Popular banco de dados do i-Educar (Seeders)
+# Ação 2: Popular banco de dados do i-Educar (Seeders Censo 2026)
 action_seed_database() {
     echo ""
     echo -e "${CYAN}======================================================================${NC}"
-    echo -e "${CYAN}    POVOAMENTO INICIAL DO BANCO DE DADOS (24 SEEDERS EDUCACENSO)      ${NC}"
+    echo -e "${CYAN}    POVOAMENTO INICIAL DO BANCO DE DADOS (30 SEEDERS CENSO 2026)      ${NC}"
     echo -e "${CYAN}======================================================================${NC}"
-    if "${INSTALL_DIR}/scripts/seed-database.sh"; then
-        echo -e "\n${GREEN}✓ Povoamento inicial concluído com sucesso!${NC}"
+    if [[ -f "${INSTALL_DIR}/scripts/seed-database-2026.sh" ]]; then
+        if "${INSTALL_DIR}/scripts/seed-database-2026.sh"; then
+            echo -e "\n${GREEN}✓ Povoamento inicial Censo 2026 concluído com sucesso!${NC}"
+        else
+            echo -e "\n${YELLOW}O processo de seed finalizou com avisos. Verifique as mensagens acima.${NC}"
+        fi
     else
-        echo -e "\n${YELLOW}O processo de seed finalizou com avisos. Verifique as mensagens acima.${NC}"
+        if "${INSTALL_DIR}/scripts/seed-database.sh"; then
+            echo -e "\n${GREEN}✓ Povoamento inicial concluído com sucesso!${NC}"
+        else
+            echo -e "\n${YELLOW}O processo de seed finalizou com avisos. Verifique as mensagens acima.${NC}"
+        fi
     fi
 }
 
@@ -449,7 +458,7 @@ case "${1:-}" in
         action_configure_backups
         exit 0
         ;;
-    --seed|-s)
+    --seed|-s|--seed-2026)
         action_seed_database
         exit 0
         ;;
@@ -484,7 +493,7 @@ while true; do
     echo -e "   ${GREEN}[1]${NC}  🚀  Instalar i-Educar (Gestão Escolar)"
     echo -e "   ${GREEN}[2]${NC}  📓  Instalar i-Diário (Diário do Professor)"
     echo -e "   ${GREEN}[3]${NC}  🛡️  Configurar Backups Automáticos (MinIO S3 & Cron)"
-    echo -e "   ${GREEN}[4]${NC}  🧬  Popular Banco de Dados (24 Seeders Educacenso)"
+    echo -e "   ${GREEN}[4]${NC}  🧬  Popular Banco de Dados (30 Seeders Censo 2026)"
     echo -e "   ${GREEN}[5]${NC}  🎨  Configurar Atalhos Rápidos (Dashboard do i-Educar)"
     echo -e "   ${GREEN}[6]${NC}  ⚡  Configurar Memória SWAP (Desempenho da VPS)"
     echo -e "   ${GREEN}[7]${NC}  🗺️  Migrar Mapas PMD (Pré-Matrícula OpenStreetMap)"

@@ -27,3 +27,8 @@ minio-data/
 .DS_Store
 Thumbs.db
 .agent/
+
+# Planilhas locais temporárias
+*.xlsx
+*.xls
+
