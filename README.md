@@ -26,9 +26,13 @@ Ao executar, o script abre uma **Central Interativa** no terminal, permitindo es
 - `[11]` 🔒 **Configurar Domínios & SSL HTTPS**
 - `[12]` 📦 **Instalar / Atualizar Educacenso**
 - `[13]` 🛠️ **Corrigir Ativos HTTPS / CSS**
-- `[14]` 🖼️ **Tema Moderno de Login**
+- `[14]` 🖼️ **Tema Moderno de Login (i-Educar)**
 - `[15]` 🔄 **Restaurar Backup do MinIO**
 - `[16]` 💾 **Executar Backup Manual Agora**
+- `[17]` 🔍 **Corrigir Busca Sem Acento, Notificações & PMD**
+- `[18]` 🛠️ **Correção Geral de Relatórios (136 Templates Jasper)**
+- `[19]` 📦 **Instalar Pacote de Relatórios i-Educar v2.11**
+- `[20]` 🎨 **Tema Moderno de Login (i-Diário)**
 - `[0]` 🚪 **Sair**
 
 > 💡 *Após cada ação concluída, o script retorna automaticamente à tela inicial para que você possa efetuar outras operações sem precisar reiniciá-lo.*
@@ -71,9 +75,23 @@ cd /opt/ieducar-backup && git pull origin main
 - 🎯 **Gabarito OMR & Elaborador de Provas (BNCC):** Sistema autohospedável para elaboração de avaliações, geração de folhas de respostas em PDF e correção instantânea por visão computacional via smartphone (`omr-install`).
 - 🔒 **Configuração Automática de Domínio & SSL HTTPS (Let's Encrypt):** Permite informar apenas os domínios apontados para a VPS. O script configura automaticamente os blocos do Nginx, emite certificados SSL com renovação automática (Certbot) e, no **i-Diário**, substitui automaticamente o IP na tabela `entities` do PostgreSQL pelo novo domínio (`ieducar-ssl`).
 - 📦 **Módulo Educacenso 2024 / 2025 / 2026 (Douglas):** Instalação e atualização inteligente com suporte aos Censos 2024, 2025 e 2026, correções de integridade de dados (vínculo de servidores, turnos e alocações), auto-descoberta no Composer, migrations e menu de importação (`ieducar-educacenso`).
-- 🛠️ **Correção de Ativos HTTPS / Mixed Content (i-Educar):** Soluciona problemas de CSS e JavaScript não carregados via HTTPS, configurando `APP_URL`, `ASSET_URL`, TrustProxies e esquemas de URL (`ieducar-fix-https`).
-- 🖼️ **Tema de Login Moderno (Sistema Canoa 2026):** Redesign completo da tela de login com Glassmorphism, ondas orgânicas, paleta oficial da Prefeitura de Lagoa da Canoa, preservando 100% dos dados dinâmicos, tokens de autenticação, CSRF, GTM e reCAPTCHA (`ieducar-login-theme`).
+- 🖼️ **Tema de Login Moderno (i-Educar Canoa 2026):** Redesign completo da tela de login com Glassmorphism, ondas orgânicas, paleta oficial da Prefeitura de Lagoa da Canoa, preservando 100% dos dados dinâmicos, tokens de autenticação, CSRF, GTM e reCAPTCHA (`ieducar-login-theme`).
+- 🔍 **Busca Sem Acento (unaccent), Notificações & PMD (i-Educar):** Habilita extensão unaccent no PostgreSQL, resolve busca do menu, zera falso contador de notificações e elimina tela branca na Pré-Matrícula Digital (`ieducar-fix-search`).
+- 🛠️ **Correção Geral de Relatórios & Menus (Douglas 2.11):** Compila e repara todos os 136 templates Jasper, remove menus 404 quebrados, instala dependências (Java JRE e Headless Chrome) e ajusta permissões (`ieducar-reports-all`).
+- 📦 **Instalador Completo do Pacote de Relatórios (v2.11):** Substitui o pacote padrão, executa composer, compila templates e publica assets oficiais (`ieducar-reports-install`).
+- 🎨 **Tema Moderno de Login para o i-Diário (Canoa 2026):** Redesign completo da autenticação do i-Diário com identidade visual de Lagoa da Canoa, SVG animado e compatibilidade com Devise (`idiario-login`).
 - 🔔 **Notificações:** Suporte a webhooks de alerta no Discord e Telegram.
+
+---
+
+### ⚡ Scripts de Correção Rápida & Pacote de Relatórios (Branch 2.11)
+
+| Script | Finalidade Principal | Tempo Médio | Atalho Global | Comando Direto via Curl |
+|---|---|---|---|---|
+| `fix_search_and_notifications.sh` | Busca sem acento (unaccent) + Notificações corrigidas + PMD (tela branca resolvida) | ~5 segundos | `ieducar-fix-search` | `curl -fsSL https://raw.githubusercontent.com/douglas14031999/i-educar-reports-package/2.11/fix_search_and_notifications.sh \| bash` |
+| `fix_all.sh` | Correção Geral Completa: busca, notificações, 136 relatórios compilados, limpeza de menus 404, realocação de módulos e permissões | ~45 segundos | `ieducar-reports-all` | `curl -fsSL https://raw.githubusercontent.com/douglas14031999/i-educar-reports-package/2.11/fix_all.sh \| bash` |
+| `install.sh` | Instalador Completo do Pacote: substitui pacote padrão, roda composer, compila templates e publica assets | ~60 segundos | `ieducar-reports-install` | `curl -fsSL https://raw.githubusercontent.com/douglas14031999/i-educar-reports-package/2.11/install.sh \| bash` |
+| `deploy_login_vps.sh` | Novo Design da Tela de Login/Autenticação do i-Diário (Lagoa da Canoa) | ~10 segundos | `idiario-login` | `curl -fsSL https://raw.githubusercontent.com/douglas14031999/i-educar-reports-package/2.11/deploy_login_vps.sh \| bash` |
 
 ---
 
@@ -88,11 +106,15 @@ cd /opt/ieducar-backup && git pull origin main
 │   ├── install-ieducar.sh      # Instalador completo automatizado do i-Educar e todos os módulos
 │   ├── install-idiario.sh      # Instalador completo automatizado do i-Diário (Rails/Ruby 2.6)
 │   ├── setup-idiario-class-diary.sh # Diário de Classe Escolar Unificado para o i-Diário
+│   ├── setup-idiario-login-theme.sh # Aplicador do tema moderno de login do i-Diário (Canoa 2026)
 │   ├── install-omr.sh          # Instalador do Gabarito OMR & Elaborador de Provas (BNCC)
 │   ├── setup-domain-ssl.sh     # Automação de Nginx, SSL Certbot e migração de entidades do i-Diário
 │   ├── install-educacenso.sh   # Instalador e atualizador inteligente do pacote Educacenso (2024-2026)
 │   ├── fix-ieducar-https.sh    # Correção de CSS, JS e ativos HTTPS (Mixed Content) no i-Educar
-│   ├── setup-login-theme.sh    # Aplicador do tema moderno de login (Sistema Canoa 2026)
+│   ├── setup-login-theme.sh    # Aplicador do tema moderno de login (i-Educar Canoa 2026)
+│   ├── fix-search-and-notifications.sh # Correção de busca unaccent, notificações e PMD
+│   ├── fix-reports-all.sh      # Correção completa de 136 relatórios, menus e dependências
+│   ├── install-reports-package.sh # Instalador do pacote completo de relatórios v2.11
 │   ├── backup.sh               # Script principal executado pelo cron (dumps, sync e MinIO)
 │   ├── restore.sh              # Utilitário interativo de restauração
 │   ├── setup-dashboard.sh      # Configurador automático da tela de atalhos rápidos do i-Educar

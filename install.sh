@@ -6,6 +6,8 @@
 #           - Povoamento Inicial do Banco de Dados (24 Seeders Educacenso)
 #           - Painel de Atalhos Rápidos Moderno no i-Educar
 #           - Assistente de Restauração (Disaster Recovery)
+#           - Pacote Completo de Relatórios 2.11 & Correções Avançadas
+#           - Temas Modernos de Login para i-Educar e i-Diário
 # Uso via curl:
 #   curl -fsSL https://raw.githubusercontent.com/douglas14031999/ieducar-idiario-backup/main/install.sh | bash
 # ==============================================================================
@@ -128,6 +130,10 @@ bootstrap_environment() {
     ln -sf "${INSTALL_DIR}/scripts/fix-ieducar-https.sh" /usr/local/bin/ieducar-fix-https
     ln -sf "${INSTALL_DIR}/scripts/install-educacenso.sh" /usr/local/bin/ieducar-educacenso
     ln -sf "${INSTALL_DIR}/scripts/setup-login-theme.sh" /usr/local/bin/ieducar-login-theme
+    ln -sf "${INSTALL_DIR}/scripts/fix-search-and-notifications.sh" /usr/local/bin/ieducar-fix-search
+    ln -sf "${INSTALL_DIR}/scripts/fix-reports-all.sh" /usr/local/bin/ieducar-reports-all
+    ln -sf "${INSTALL_DIR}/scripts/install-reports-package.sh" /usr/local/bin/ieducar-reports-install
+    ln -sf "${INSTALL_DIR}/scripts/setup-idiario-login-theme.sh" /usr/local/bin/idiario-login
 
     render_progress_bar 100 "Carregamento concluído com êxito!"
     echo ""
@@ -358,6 +364,30 @@ action_setup_login_theme() {
     "${INSTALL_DIR}/scripts/setup-login-theme.sh" || true
 }
 
+# Ação: Corrigir Busca Sem Acento, Notificações & Tela Branca PMD (i-Educar)
+action_fix_search_notifications() {
+    echo ""
+    "${INSTALL_DIR}/scripts/fix-search-and-notifications.sh" || true
+}
+
+# Ação: Correção Geral Completa de Relatórios e Menus (136 Templates Jasper)
+action_fix_reports_all() {
+    echo ""
+    "${INSTALL_DIR}/scripts/fix-reports-all.sh" || true
+}
+
+# Ação: Instalar / Atualizar Pacote Completo de Relatórios i-Educar (v2.11)
+action_install_reports_package() {
+    echo ""
+    "${INSTALL_DIR}/scripts/install-reports-package.sh" || true
+}
+
+# Ação: Aplicar Tema Moderno de Login no i-Diário (Sistema Canoa 2026)
+action_setup_idiario_login_theme() {
+    echo ""
+    "${INSTALL_DIR}/scripts/setup-idiario-login-theme.sh" || true
+}
+
 # ==============================================================================
 # MENU PRINCIPAL INTERATIVO
 # ==============================================================================
@@ -397,6 +427,22 @@ case "${1:-}" in
         ;;
     --login-theme|--login|-l)
         action_setup_login_theme
+        exit 0
+        ;;
+    --fix-search|--busca|-bs)
+        action_fix_search_notifications
+        exit 0
+        ;;
+    --fix-reports|--reports-all|-ra)
+        action_fix_reports_all
+        exit 0
+        ;;
+    --install-reports|--reports|-rp)
+        action_install_reports_package
+        exit 0
+        ;;
+    --idiario-login|--login-idiario|-li)
+        action_setup_idiario_login_theme
         exit 0
         ;;
     --backup|-b)
@@ -451,11 +497,15 @@ while true; do
     echo -e "   ${GREEN}[14]${NC} 🖼️  Aplicar Tema Moderno de Login (i-Educar)"
     echo -e "   ${GREEN}[15]${NC} 🔄  Restaurar Backup do MinIO (Assistente)"
     echo -e "   ${GREEN}[16]${NC} 💾  Executar Backup Manual Completo Agora"
+    echo -e "   ${GREEN}[17]${NC} 🔍  Corrigir Busca Sem Acento, Notificações & PMD (i-Educar)"
+    echo -e "   ${GREEN}[18]${NC} 🛠️  Correção Geral de Relatórios (136 Templates Jasper & Menus 404)"
+    echo -e "   ${GREEN}[19]${NC} 📦  Instalar Pacote Completo de Relatórios i-Educar (v2.11)"
+    echo -e "   ${GREEN}[20]${NC} 🎨  Aplicar Tema Moderno de Login (i-Diário - Canoa 2026)"
     echo -e "   ${YELLOW}[0]${NC}  🚪  Sair"
     echo -e "${CYAN}======================================================================${NC}"
 
     CHOICE=""
-    read_input " Digite a opção desejada [0-16]: " "" CHOICE
+    read_input " Digite a opção desejada [0-20]: " "" CHOICE
 
     # Prevenção contra loop infinito em terminais não-interativos
     if [[ -z "$CHOICE" ]] && [ ! -e /dev/tty ]; then
@@ -512,6 +562,18 @@ while true; do
         16)
             action_test_backup
             ;;
+        17)
+            action_fix_search_notifications
+            ;;
+        18)
+            action_fix_reports_all
+            ;;
+        19)
+            action_install_reports_package
+            ;;
+        20)
+            action_setup_idiario_login_theme
+            ;;
         0|sair|exit|q)
             echo ""
             echo -e "${GREEN}Encerrando a Central de Ferramentas. Até logo!${NC}"
@@ -519,7 +581,7 @@ while true; do
             exit 0
             ;;
         *)
-            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 16.${NC}"
+            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 20.${NC}"
             ;;
     esac
 

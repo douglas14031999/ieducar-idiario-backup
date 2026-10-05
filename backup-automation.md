@@ -32,3 +32,8 @@
 
 ### Fase 6: Verificação e Validação
 - [x] **Tarefa 6.1:** Validar sintaxe dos scripts Shell (`bash -n`), permissões de execução e consistência das variáveis.
+
+### Fase 7: Pacote de Relatórios 2.11 e Redesign de Login (i-Diário)
+- [x] **Tarefa 7.1:** Adicionar scripts locais para correção unaccent/notificações (`scripts/fix-search-and-notifications.sh`), reparo geral de 136 relatórios (`scripts/fix-reports-all.sh`), instalador do pacote de relatórios (`scripts/install-reports-package.sh`) e redesign de autenticação do i-Diário (`scripts/setup-idiario-login-theme.sh`).
+- [x] **Tarefa 7.2:** Integrar novas opções `[17]` a `[20]`, atalhos de terminal globais em `/usr/local/bin/` e flags CLI no `install.sh`.
+- [x] **Tarefa 7.3:** Atualizar `README.md` com tabela de comandos curl diretos e novos atalhos globais.
