@@ -3,8 +3,9 @@
 # Script: install.sh
 # Objetivo: Central Interativa de Automação e Ferramentas para i-Educar e i-Diário:
 #           - Backups Automáticos no MinIO com Cron diário (23:59)
-#           - Povoamento Inicial do Banco de Dados (24 Seeders Educacenso)
+#           - Povoamento Inicial do Banco de Dados (30 Seeders Educacenso 2026)
 #           - Painel de Atalhos Rápidos Moderno no i-Educar
+#           - Widget Menu de Ajuda Oficial Integrado ao i-Educar (76 Telas)
 #           - Assistente de Restauração (Disaster Recovery)
 #           - Pacote Completo de Relatórios 2.11 & Correções Avançadas
 #           - Temas Modernos de Login para i-Educar e i-Diário
@@ -115,26 +116,27 @@ bootstrap_environment() {
 
     # Criação de atalhos globais
     ln -sf "${INSTALL_DIR}/install.sh" /usr/local/bin/ieducar-menu
-    ln -sf "${INSTALL_DIR}/scripts/backup.sh" /usr/local/bin/ieducar-backup
-    ln -sf "${INSTALL_DIR}/scripts/restore.sh" /usr/local/bin/ieducar-restore
-    ln -sf "${INSTALL_DIR}/scripts/setup-dashboard.sh" /usr/local/bin/ieducar-dashboard
-    ln -sf "${INSTALL_DIR}/scripts/seed-database.sh" /usr/local/bin/ieducar-seed
-    ln -sf "${INSTALL_DIR}/scripts/seed-database-2026.sh" /usr/local/bin/ieducar-seed-2026
     ln -sf "${INSTALL_DIR}/scripts/setup-swap.sh" /usr/local/bin/ieducar-swap
-    ln -sf "${INSTALL_DIR}/scripts/setup-pmd-leaflet.sh" /usr/local/bin/ieducar-pmd
-    ln -sf "${INSTALL_DIR}/scripts/setup-idiario-profile.sh" /usr/local/bin/idiario-perfil
     ln -sf "${INSTALL_DIR}/scripts/install-ieducar.sh" /usr/local/bin/ieducar-install
     ln -sf "${INSTALL_DIR}/scripts/install-idiario.sh" /usr/local/bin/idiario-install
-    ln -sf "${INSTALL_DIR}/scripts/setup-idiario-class-diary.sh" /usr/local/bin/idiario-diario-unificado
-    ln -sf "${INSTALL_DIR}/scripts/install-omr.sh" /usr/local/bin/omr-install
     ln -sf "${INSTALL_DIR}/scripts/setup-domain-ssl.sh" /usr/local/bin/ieducar-ssl
     ln -sf "${INSTALL_DIR}/scripts/fix-ieducar-https.sh" /usr/local/bin/ieducar-fix-https
+    ln -sf "${INSTALL_DIR}/scripts/seed-database.sh" /usr/local/bin/ieducar-seed
+    ln -sf "${INSTALL_DIR}/scripts/seed-database-2026.sh" /usr/local/bin/ieducar-seed-2026
     ln -sf "${INSTALL_DIR}/scripts/install-educacenso.sh" /usr/local/bin/ieducar-educacenso
-    ln -sf "${INSTALL_DIR}/scripts/setup-login-theme.sh" /usr/local/bin/ieducar-login-theme
-    ln -sf "${INSTALL_DIR}/scripts/fix-search-and-notifications.sh" /usr/local/bin/ieducar-fix-search
-    ln -sf "${INSTALL_DIR}/scripts/fix-reports-all.sh" /usr/local/bin/ieducar-reports-all
     ln -sf "${INSTALL_DIR}/scripts/install-reports-package.sh" /usr/local/bin/ieducar-reports-install
+    ln -sf "${INSTALL_DIR}/scripts/fix-reports-all.sh" /usr/local/bin/ieducar-reports-all
+    ln -sf "${INSTALL_DIR}/scripts/fix-search-and-notifications.sh" /usr/local/bin/ieducar-fix-search
+    ln -sf "${INSTALL_DIR}/scripts/setup-pmd-leaflet.sh" /usr/local/bin/ieducar-pmd
+    ln -sf "${INSTALL_DIR}/scripts/setup-dashboard.sh" /usr/local/bin/ieducar-dashboard
+    ln -sf "${INSTALL_DIR}/scripts/setup-help-widget.sh" /usr/local/bin/ieducar-help-widget
+    ln -sf "${INSTALL_DIR}/scripts/setup-login-theme.sh" /usr/local/bin/ieducar-login-theme
+    ln -sf "${INSTALL_DIR}/scripts/setup-idiario-class-diary.sh" /usr/local/bin/idiario-diario-unificado
+    ln -sf "${INSTALL_DIR}/scripts/setup-idiario-profile.sh" /usr/local/bin/idiario-perfil
     ln -sf "${INSTALL_DIR}/scripts/setup-idiario-login-theme.sh" /usr/local/bin/idiario-login
+    ln -sf "${INSTALL_DIR}/scripts/install-omr.sh" /usr/local/bin/omr-install
+    ln -sf "${INSTALL_DIR}/scripts/backup.sh" /usr/local/bin/ieducar-backup
+    ln -sf "${INSTALL_DIR}/scripts/restore.sh" /usr/local/bin/ieducar-restore
 
     render_progress_bar 100 "Carregamento concluído com êxito!"
     echo ""
@@ -397,6 +399,12 @@ action_setup_idiario_login_theme() {
     "${INSTALL_DIR}/scripts/setup-idiario-login-theme.sh" || true
 }
 
+# Ação: Instalar Widget Menu de Ajuda Oficial no i-Educar (76 Telas)
+action_setup_help_widget() {
+    echo ""
+    "${INSTALL_DIR}/scripts/setup-help-widget.sh" || true
+}
+
 # ==============================================================================
 # MENU PRINCIPAL INTERATIVO
 # ==============================================================================
@@ -406,6 +414,10 @@ bootstrap_environment
 
 # Se foi passado algum argumento direto via linha de comando
 case "${1:-}" in
+    --swap|-w)
+        action_configure_swap
+        exit 0
+        ;;
     --install-ieducar|--install|-install)
         action_install_ieducar
         exit 0
@@ -414,68 +426,72 @@ case "${1:-}" in
         action_install_idiario
         exit 0
         ;;
-    --class-diary|--diario-unificado|-du)
-        action_setup_class_diary
-        exit 0
-        ;;
-    --omr|--gabarito-omr|-omr)
-        action_install_omr
-        exit 0
-        ;;
     --ssl|--domain|-ssl)
         action_setup_domain_ssl
-        exit 0
-        ;;
-    --educacenso|--censo|-c)
-        action_install_educacenso
         exit 0
         ;;
     --fix-https|--fix-css|-fix)
         action_fix_https
         exit 0
         ;;
-    --login-theme|--login|-l)
-        action_setup_login_theme
+    --seed|-s|--seed-2026)
+        action_seed_database
         exit 0
         ;;
-    --fix-search|--busca|-bs)
-        action_fix_search_notifications
-        exit 0
-        ;;
-    --fix-reports|--reports-all|-ra)
-        action_fix_reports_all
+    --educacenso|--censo|-c)
+        action_install_educacenso
         exit 0
         ;;
     --install-reports|--reports|-rp)
         action_install_reports_package
         exit 0
         ;;
-    --idiario-login|--login-idiario|-li)
-        action_setup_idiario_login_theme
+    --fix-reports|--reports-all|-ra)
+        action_fix_reports_all
         exit 0
         ;;
-    --backup|-b)
-        action_configure_backups
-        exit 0
-        ;;
-    --seed|-s|--seed-2026)
-        action_seed_database
-        exit 0
-        ;;
-    --dashboard|-d)
-        action_setup_dashboard
-        exit 0
-        ;;
-    --swap|-w)
-        action_configure_swap
+    --fix-search|--busca|-bs)
+        action_fix_search_notifications
         exit 0
         ;;
     --pmd|-p)
         action_setup_pmd
         exit 0
         ;;
+    --dashboard|-d)
+        action_setup_dashboard
+        exit 0
+        ;;
+    --help-widget|--widget|-hw)
+        action_setup_help_widget
+        exit 0
+        ;;
+    --login-theme|--login|-l)
+        action_setup_login_theme
+        exit 0
+        ;;
+    --class-diary|--diario-unificado|-du)
+        action_setup_class_diary
+        exit 0
+        ;;
     --idiario-profile|-i)
         action_setup_idiario_profile
+        exit 0
+        ;;
+    --idiario-login|--login-idiario|-li)
+        action_setup_idiario_login_theme
+        exit 0
+        ;;
+    --omr|--gabarito-omr|-omr)
+        action_install_omr
+        exit 0
+        ;;
+    --backup|-b)
+        action_configure_backups
+        exit 0
+        ;;
+    --backup-now|-bn)
+        action_test_backup
         exit 0
         ;;
     --restore|-r)
@@ -489,32 +505,33 @@ while true; do
     clear 2>/dev/null || printf "\033c" || true
     echo -e "${CYAN}======================================================================${NC}"
     echo -e "${CYAN}        i-Educar & i-Diário - Central de Ferramentas e Automação      ${NC}"
-    echo -e " Escolha a operação desejada:\n"
-    echo -e "   ${GREEN}[1]${NC}  🚀  Instalar i-Educar (Gestão Escolar)"
-    echo -e "   ${GREEN}[2]${NC}  📓  Instalar i-Diário (Diário do Professor)"
-    echo -e "   ${GREEN}[3]${NC}  🛡️  Configurar Backups Automáticos (MinIO S3 & Cron)"
-    echo -e "   ${GREEN}[4]${NC}  🧬  Popular Banco de Dados (30 Seeders Censo 2026)"
-    echo -e "   ${GREEN}[5]${NC}  🎨  Configurar Atalhos Rápidos (Dashboard do i-Educar)"
-    echo -e "   ${GREEN}[6]${NC}  ⚡  Configurar Memória SWAP (Desempenho da VPS)"
-    echo -e "   ${GREEN}[7]${NC}  🗺️  Migrar Mapas PMD (Pré-Matrícula OpenStreetMap)"
-    echo -e "   ${GREEN}[8]${NC}  👤  Corrigir Foto de Perfil & Menu (i-Diário)"
-    echo -e "   ${GREEN}[9]${NC}  📑  Instalar Diário de Classe Unificado (i-Diário)"
-    echo -e "   ${GREEN}[10]${NC} 🎯  Instalar Gabarito OMR de Provas (Leitura Automática)"
-    echo -e "   ${GREEN}[11]${NC} 🔒  Configurar Domínios & Certificados SSL HTTPS"
-    echo -e "   ${GREEN}[12]${NC} 📦  Instalar / Atualizar Pacote Educacenso (2024 a 2026)"
-    echo -e "   ${GREEN}[13]${NC} 🛠️  Corrigir Ativos HTTPS & Estilos CSS (i-Educar)"
-    echo -e "   ${GREEN}[14]${NC} 🖼️  Aplicar Tema Moderno de Login (i-Educar)"
-    echo -e "   ${GREEN}[15]${NC} 🔄  Restaurar Backup do MinIO (Assistente)"
-    echo -e "   ${GREEN}[16]${NC} 💾  Executar Backup Manual Completo Agora"
-    echo -e "   ${GREEN}[17]${NC} 🔍  Corrigir Busca Sem Acento, Notificações & PMD (i-Educar)"
-    echo -e "   ${GREEN}[18]${NC} 🛠️  Correção Geral de Relatórios (136 Templates Jasper & Menus 404)"
-    echo -e "   ${GREEN}[19]${NC} 📦  Instalar Pacote Completo de Relatórios i-Educar (v2.11)"
-    echo -e "   ${GREEN}[20]${NC} 🎨  Aplicar Tema Moderno de Login (i-Diário - Canoa 2026)"
+    echo -e " Escolha a operação desejada (ordem recomendada de execução):\n"
+    echo -e "   ${GREEN}[1]${NC}  ⚡  Configurar Memória SWAP (Desempenho da VPS)"
+    echo -e "   ${GREEN}[2]${NC}  🚀  Instalar i-Educar (Gestão Escolar)"
+    echo -e "   ${GREEN}[3]${NC}  📓  Instalar i-Diário (Diário do Professor)"
+    echo -e "   ${GREEN}[4]${NC}  🔒  Configurar Domínios & Certificados SSL HTTPS"
+    echo -e "   ${GREEN}[5]${NC}  🛠️  Corrigir Ativos HTTPS & Estilos CSS (i-Educar)"
+    echo -e "   ${GREEN}[6]${NC}  🧬  Popular Banco de Dados (30 Seeders Censo 2026)"
+    echo -e "   ${GREEN}[7]${NC}  📦  Instalar / Atualizar Pacote Educacenso (2024 a 2026)"
+    echo -e "   ${GREEN}[8]${NC}  📦  Instalar Pacote Completo de Relatórios i-Educar (v2.11)"
+    echo -e "   ${GREEN}[9]${NC}  🛠️  Correção Geral de Relatórios (136 Templates Jasper & Menus 404)"
+    echo -e "   ${GREEN}[10]${NC} 🔍  Corrigir Busca Sem Acento, Notificações & PMD (i-Educar)"
+    echo -e "   ${GREEN}[11]${NC} 🗺️  Migrar Mapas PMD (Pré-Matrícula OpenStreetMap)"
+    echo -e "   ${GREEN}[12]${NC} 🎨  Configurar Atalhos Rápidos (Dashboard do i-Educar)"
+    echo -e "   ${GREEN}[13]${NC} 💡  Instalar Widget Menu de Ajuda Oficial (i-Educar)"
+    echo -e "   ${GREEN}[14]${NC} 🖼️  Aplicar Tema Moderno de Login (i-Educar - Canoa 2026)"
+    echo -e "   ${GREEN}[15]${NC} 📑  Instalar Diário de Classe Unificado (i-Diário)"
+    echo -e "   ${GREEN}[16]${NC} 👤  Corrigir Foto de Perfil & Menu (i-Diário)"
+    echo -e "   ${GREEN}[17]${NC} 🎨  Aplicar Tema Moderno de Login (i-Diário - Canoa 2026)"
+    echo -e "   ${GREEN}[18]${NC} 🎯  Instalar Gabarito OMR de Provas (Leitura Automática)"
+    echo -e "   ${GREEN}[19]${NC} 🛡️  Configurar Backups Automáticos (MinIO S3 & Cron)"
+    echo -e "   ${GREEN}[20]${NC} 💾  Executar Backup Manual Completo Agora"
+    echo -e "   ${GREEN}[21]${NC} 🔄  Restaurar Backup do MinIO (Assistente / Recuperação)"
     echo -e "   ${YELLOW}[0]${NC}  🚪  Sair"
     echo -e "${CYAN}======================================================================${NC}"
 
     CHOICE=""
-    read_input " Digite a opção desejada [0-20]: " "" CHOICE
+    read_input " Digite a opção desejada [0-21]: " "" CHOICE
 
     # Prevenção contra loop infinito em terminais não-interativos
     if [[ -z "$CHOICE" ]] && [ ! -e /dev/tty ]; then
@@ -524,64 +541,67 @@ while true; do
 
     case "$CHOICE" in
         1)
-            action_install_ieducar
-            ;;
-        2)
-            action_install_idiario
-            ;;
-        3)
-            action_configure_backups
-            ;;
-        4)
-            action_seed_database
-            ;;
-        5)
-            action_setup_dashboard
-            ;;
-        6)
             action_configure_swap
             ;;
-        7)
-            action_setup_pmd
+        2)
+            action_install_ieducar
             ;;
-        8)
-            action_setup_idiario_profile
+        3)
+            action_install_idiario
             ;;
-        9)
-            action_setup_class_diary
-            ;;
-        10)
-            action_install_omr
-            ;;
-        11)
+        4)
             action_setup_domain_ssl
             ;;
-        12)
+        5)
+            action_fix_https
+            ;;
+        6)
+            action_seed_database
+            ;;
+        7)
             action_install_educacenso
             ;;
+        8)
+            action_install_reports_package
+            ;;
+        9)
+            action_fix_reports_all
+            ;;
+        10)
+            action_fix_search_notifications
+            ;;
+        11)
+            action_setup_pmd
+            ;;
+        12)
+            action_setup_dashboard
+            ;;
         13)
-            action_fix_https
+            action_setup_help_widget
             ;;
         14)
             action_setup_login_theme
             ;;
         15)
-            action_restore
+            action_setup_class_diary
             ;;
         16)
-            action_test_backup
+            action_setup_idiario_profile
             ;;
         17)
-            action_fix_search_notifications
+            action_setup_idiario_login_theme
             ;;
         18)
-            action_fix_reports_all
+            action_install_omr
             ;;
         19)
-            action_install_reports_package
+            action_configure_backups
             ;;
         20)
-            action_setup_idiario_login_theme
+            action_test_backup
+            ;;
+        21)
+            action_restore
             ;;
         0|sair|exit|q)
             echo ""
@@ -590,7 +610,7 @@ while true; do
             exit 0
             ;;
         *)
-            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 20.${NC}"
+            echo -e "\n${RED}Opção inválida! Escolha um número entre 0 e 21.${NC}"
             ;;
     esac
 

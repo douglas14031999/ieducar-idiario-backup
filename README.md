@@ -12,27 +12,28 @@ Para acessar o painel de ferramentas completo na sua VPS com apenas um comando, 
 curl -fsSL https://raw.githubusercontent.com/douglas14031999/ieducar-idiario-backup/main/install.sh | bash
 ```
 
-Ao executar, o script abre uma **Central Interativa** no terminal, permitindo escolher facilmente a operação desejada:
-- `[1]` 🚀 **Instalar i-Educar**
-- `[2]` 📓 **Instalar i-Diário**
-- `[3]` 🛡️ **Configurar Backups Automáticos**
-- `[4]` 🧬 **Popular Banco de Dados (30 Seeders Censo 2026)**
-- `[5]` 🎨 **Configurar Atalhos Rápidos**
-- `[6]` ⚡ **Configurar Memória SWAP**
-- `[7]` 🗺️ **Migrar Mapas PMD (OpenStreetMap)**
-- `[8]` 👤 **Corrigir Perfil & Menu (i-Diário)**
-- `[9]` 📑 **Instalar Diário de Classe Unificado**
-- `[10]` 🎯 **Instalar Gabarito OMR de Provas**
-- `[11]` 🔒 **Configurar Domínios & SSL HTTPS**
-- `[12]` 📦 **Instalar / Atualizar Educacenso**
-- `[13]` 🛠️ **Corrigir Ativos HTTPS / CSS**
-- `[14]` 🖼️ **Tema Moderno de Login (i-Educar)**
-- `[15]` 🔄 **Restaurar Backup do MinIO**
-- `[16]` 💾 **Executar Backup Manual Agora**
-- `[17]` 🔍 **Corrigir Busca Sem Acento, Notificações & PMD**
-- `[18]` 🛠️ **Correção Geral de Relatórios (136 Templates Jasper)**
-- `[19]` 📦 **Instalar Pacote de Relatórios i-Educar v2.11**
-- `[20]` 🎨 **Tema Moderno de Login (i-Diário)**
+Ao executar, o script abre uma **Central Interativa** no terminal, organizada na ordem cronológica recomendada de execução:
+- `[1]` ⚡ **Configurar Memória SWAP (Desempenho da VPS)**
+- `[2]` 🚀 **Instalar i-Educar (Gestão Escolar)**
+- `[3]` 📓 **Instalar i-Diário (Diário do Professor)**
+- `[4]` 🔒 **Configurar Domínios & Certificados SSL HTTPS**
+- `[5]` 🛠️ **Corrigir Ativos HTTPS & Estilos CSS (i-Educar)**
+- `[6]` 🧬 **Popular Banco de Dados (30 Seeders Censo 2026)**
+- `[7]` 📦 **Instalar / Atualizar Pacote Educacenso (2024 a 2026)**
+- `[8]` 📦 **Instalar Pacote Completo de Relatórios i-Educar (v2.11)**
+- `[9]` 🛠️ **Correção Geral de Relatórios (136 Templates Jasper & Menus 404)**
+- `[10]` 🔍 **Corrigir Busca Sem Acento, Notificações & PMD (i-Educar)**
+- `[11]` 🗺️ **Migrar Mapas PMD (Pré-Matrícula OpenStreetMap)**
+- `[12]` 🎨 **Configurar Atalhos Rápidos (Dashboard do i-Educar)**
+- `[13]` 💡 **Instalar Widget Menu de Ajuda Oficial (i-Educar)**
+- `[14]` 🖼️ **Aplicar Tema Moderno de Login (i-Educar - Canoa 2026)**
+- `[15]` 📑 **Instalar Diário de Classe Unificado (i-Diário)**
+- `[16]` 👤 **Corrigir Foto de Perfil & Menu (i-Diário)**
+- `[17]` 🎨 **Aplicar Tema Moderno de Login (i-Diário - Canoa 2026)**
+- `[18]` 🎯 **Instalar Gabarito OMR de Provas (Leitura Automática)**
+- `[19]` 🛡️ **Configurar Backups Automáticos (MinIO S3 & Cron)**
+- `[20]` 💾 **Executar Backup Manual Completo Agora**
+- `[21]` 🔄 **Restaurar Backup do MinIO (Assistente / Recuperação)**
 - `[0]` 🚪 **Sair**
 
 > 💡 *Após cada ação concluída, o script retorna automaticamente à tela inicial para que você possa efetuar outras operações sem precisar reiniciá-lo.*
@@ -79,6 +80,7 @@ cd /opt/ieducar-backup && git pull origin main
 - 🔍 **Busca Sem Acento (unaccent), Notificações & PMD (i-Educar):** Habilita extensão unaccent no PostgreSQL, resolve busca do menu, zera falso contador de notificações e elimina tela branca na Pré-Matrícula Digital (`ieducar-fix-search`).
 - 🛠️ **Correção Geral de Relatórios & Menus (Douglas 2.11):** Compila e repara todos os 136 templates Jasper, remove menus 404 quebrados, instala dependências (Java JRE e Headless Chrome) e ajusta permissões (`ieducar-reports-all`).
 - 📦 **Instalador Completo do Pacote de Relatórios (v2.11):** Substitui o pacote padrão, executa composer, compila templates e publica assets oficiais (`ieducar-reports-install`).
+- 💡 **Widget Menu de Ajuda Oficial (i-Educar):** Central interativa de documentação, manual do usuário com 76 telas oficiais, atalhos rápidos e suporte contextual integrado diretamente ao layout Blade do i-Educar (`ieducar-help-widget`).
 - 🎨 **Tema Moderno de Login para o i-Diário (Canoa 2026):** Redesign completo da autenticação do i-Diário com identidade visual de Lagoa da Canoa, SVG animado e compatibilidade com Devise (`idiario-login`).
 - 🔔 **Notificações:** Suporte a webhooks de alerta no Discord e Telegram.
 
@@ -91,6 +93,7 @@ cd /opt/ieducar-backup && git pull origin main
 | `fix_search_and_notifications.sh` | Busca sem acento (unaccent) + Notificações corrigidas + PMD (tela branca resolvida) | ~5 segundos | `ieducar-fix-search` | `curl -fsSL https://raw.githubusercontent.com/douglas14031999/i-educar-reports-package/2.11/fix_search_and_notifications.sh \| bash` |
 | `fix_all.sh` | Correção Geral Completa: busca, notificações, 136 relatórios compilados, limpeza de menus 404, realocação de módulos e permissões | ~45 segundos | `ieducar-reports-all` | `curl -fsSL https://raw.githubusercontent.com/douglas14031999/i-educar-reports-package/2.11/fix_all.sh \| bash` |
 | `install.sh` | Instalador Completo do Pacote: substitui pacote padrão, roda composer, compila templates e publica assets | ~60 segundos | `ieducar-reports-install` | `curl -fsSL https://raw.githubusercontent.com/douglas14031999/i-educar-reports-package/2.11/install.sh \| bash` |
+| `deploy_help_widget.sh` | Central e Widget Menu de Ajuda Oficial com 76 telas e manual interativo integrado ao i-Educar | ~15 segundos | `ieducar-help-widget` | `curl -fsSL https://raw.githubusercontent.com/douglas14031999/i-educar-reports-package/2.11/deploy_help_widget.sh \| bash` |
 | `deploy_login_vps.sh` | Novo Design da Tela de Login/Autenticação do i-Diário (Lagoa da Canoa) | ~10 segundos | `idiario-login` | `curl -fsSL https://raw.githubusercontent.com/douglas14031999/i-educar-reports-package/2.11/deploy_login_vps.sh \| bash` |
 
 ---
@@ -115,6 +118,7 @@ cd /opt/ieducar-backup && git pull origin main
 │   ├── fix-search-and-notifications.sh # Correção de busca unaccent, notificações e PMD
 │   ├── fix-reports-all.sh      # Correção completa de 136 relatórios, menus e dependências
 │   ├── install-reports-package.sh # Instalador do pacote completo de relatórios v2.11
+│   ├── setup-help-widget.sh    # Instalador do Widget Menu de Ajuda Oficial (76 telas) no i-Educar
 │   ├── backup.sh               # Script principal executado pelo cron (dumps, sync e MinIO)
 │   ├── restore.sh              # Utilitário interativo de restauração
 │   ├── setup-dashboard.sh      # Configurador automático da tela de atalhos rápidos do i-Educar

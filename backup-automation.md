@@ -42,3 +42,9 @@
 - [x] **Tarefa 8.1:** Criar `scripts/seed-database-2026.sh` com 30 seeders atualizados (correção de Visão Monocular, recursos de prova INEP, turnos de turmas, cargos de gestão, localização diferenciada e formação continuada de docentes).
 - [x] **Tarefa 8.2:** Integrar opção atualizada no `install.sh` com atalho global `/usr/local/bin/ieducar-seed-2026` e flag CLI `--seed-2026`.
 - [x] **Tarefa 8.3:** Atualizar documentação e estrutura de arquivos no `README.md`.
+
+### Fase 9: Integração do Widget de Ajuda e Reorganização Cronológica do Menu
+- [x] **Tarefa 9.1:** Criar `scripts/setup-help-widget.sh` para instalação automatizada do Widget Menu de Ajuda Oficial (76 telas) via curl.
+- [x] **Tarefa 9.2:** Reorganizar a sequência completa do menu interativo no `install.sh` na ordem cronológica de execução (opções 1 a 21).
+- [x] **Tarefa 9.3:** Registrar atalho global `/usr/local/bin/ieducar-help-widget` e flag CLI `--help-widget`.
+- [x] **Tarefa 9.4:** Atualizar documentação no `README.md` e validar sintaxe de todos os scripts bash.
